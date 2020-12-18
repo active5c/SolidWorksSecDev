@@ -1,0 +1,10 @@
+C:\Users\felix.zhu\source\repos\SolidWorksSecDev\bin\Debug\SolidWorksSecDev.exe.config
+C:\Users\felix.zhu\source\repos\SolidWorksSecDev\bin\Debug\SolidWorksSecDev.exe
+C:\Users\felix.zhu\source\repos\SolidWorksSecDev\bin\Debug\SolidWorksSecDev.pdb
+C:\Users\felix.zhu\source\repos\SolidWorksSecDev\obj\Debug\SolidWorksSecDev.csprojAssemblyReference.cache
+C:\Users\felix.zhu\source\repos\SolidWorksSecDev\obj\Debug\SolidWorksSecDev.FrmMian.resources
+C:\Users\felix.zhu\source\repos\SolidWorksSecDev\obj\Debug\SolidWorksSecDev.Properties.Resources.resources
+C:\Users\felix.zhu\source\repos\SolidWorksSecDev\obj\Debug\SolidWorksSecDev.csproj.GenerateResource.cache
+C:\Users\felix.zhu\source\repos\SolidWorksSecDev\obj\Debug\SolidWorksSecDev.csproj.CoreCompileInputs.cache
+C:\Users\felix.zhu\source\repos\SolidWorksSecDev\obj\Debug\SolidWorksSecDev.exe
+C:\Users\felix.zhu\source\repos\SolidWorksSecDev\obj\Debug\SolidWorksSecDev.pdb
