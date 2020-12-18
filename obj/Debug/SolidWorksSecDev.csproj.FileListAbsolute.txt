@@ -8,3 +8,13 @@ C:\Users\felix.zhu\source\repos\SolidWorksSecDev\obj\Debug\SolidWorksSecDev.cspr
 C:\Users\felix.zhu\source\repos\SolidWorksSecDev\obj\Debug\SolidWorksSecDev.csproj.CoreCompileInputs.cache
 C:\Users\felix.zhu\source\repos\SolidWorksSecDev\obj\Debug\SolidWorksSecDev.exe
 C:\Users\felix.zhu\source\repos\SolidWorksSecDev\obj\Debug\SolidWorksSecDev.pdb
+E:\CSharp\repos\SolidWorksSecDev\bin\Debug\SolidWorksSecDev.exe.config
+E:\CSharp\repos\SolidWorksSecDev\bin\Debug\SolidWorksSecDev.exe
+E:\CSharp\repos\SolidWorksSecDev\bin\Debug\SolidWorksSecDev.pdb
+E:\CSharp\repos\SolidWorksSecDev\obj\Debug\SolidWorksSecDev.csprojAssemblyReference.cache
+E:\CSharp\repos\SolidWorksSecDev\obj\Debug\SolidWorksSecDev.FrmMian.resources
+E:\CSharp\repos\SolidWorksSecDev\obj\Debug\SolidWorksSecDev.Properties.Resources.resources
+E:\CSharp\repos\SolidWorksSecDev\obj\Debug\SolidWorksSecDev.csproj.GenerateResource.cache
+E:\CSharp\repos\SolidWorksSecDev\obj\Debug\SolidWorksSecDev.csproj.CoreCompileInputs.cache
+E:\CSharp\repos\SolidWorksSecDev\obj\Debug\SolidWorksSecDev.exe
+E:\CSharp\repos\SolidWorksSecDev\obj\Debug\SolidWorksSecDev.pdb

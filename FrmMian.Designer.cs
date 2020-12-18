@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.btnConnect = new System.Windows.Forms.Button();
+            this.btnEditSwModel = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btnConnect
@@ -41,11 +42,22 @@
             this.btnConnect.UseVisualStyleBackColor = true;
             this.btnConnect.Click += new System.EventHandler(this.btnConnect_Click);
             // 
+            // btnEditSwModel
+            // 
+            this.btnEditSwModel.Location = new System.Drawing.Point(170, 36);
+            this.btnEditSwModel.Name = "btnEditSwModel";
+            this.btnEditSwModel.Size = new System.Drawing.Size(122, 45);
+            this.btnEditSwModel.TabIndex = 0;
+            this.btnEditSwModel.Text = "修改零件";
+            this.btnEditSwModel.UseVisualStyleBackColor = true;
+            this.btnEditSwModel.Click += new System.EventHandler(this.btnEditSwModel_Click);
+            // 
             // FrmMian
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.btnEditSwModel);
             this.Controls.Add(this.btnConnect);
             this.Name = "FrmMian";
             this.Text = "SoliWorks二次开发专题讲解";
@@ -56,6 +68,7 @@
         #endregion
 
         private System.Windows.Forms.Button btnConnect;
+        private System.Windows.Forms.Button btnEditSwModel;
     }
 }
 
