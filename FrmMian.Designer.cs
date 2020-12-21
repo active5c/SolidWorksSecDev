@@ -30,6 +30,7 @@
         {
             this.btnConnect = new System.Windows.Forms.Button();
             this.btnEditSwModel = new System.Windows.Forms.Button();
+            this.btnEditSwAssy = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btnConnect
@@ -52,11 +53,22 @@
             this.btnEditSwModel.UseVisualStyleBackColor = true;
             this.btnEditSwModel.Click += new System.EventHandler(this.btnEditSwModel_Click);
             // 
+            // btnEditSwAssy
+            // 
+            this.btnEditSwAssy.Location = new System.Drawing.Point(310, 38);
+            this.btnEditSwAssy.Name = "btnEditSwAssy";
+            this.btnEditSwAssy.Size = new System.Drawing.Size(111, 42);
+            this.btnEditSwAssy.TabIndex = 1;
+            this.btnEditSwAssy.Text = "修改装配体";
+            this.btnEditSwAssy.UseVisualStyleBackColor = true;
+            this.btnEditSwAssy.Click += new System.EventHandler(this.btnEditSwAssy_Click);
+            // 
             // FrmMian
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.btnEditSwAssy);
             this.Controls.Add(this.btnEditSwModel);
             this.Controls.Add(this.btnConnect);
             this.Name = "FrmMian";
@@ -69,6 +81,7 @@
 
         private System.Windows.Forms.Button btnConnect;
         private System.Windows.Forms.Button btnEditSwModel;
+        private System.Windows.Forms.Button btnEditSwAssy;
     }
 }
 
