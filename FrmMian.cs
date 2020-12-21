@@ -3,7 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -77,7 +79,8 @@ namespace SolidWorksSecDev
             if (swApp == null) return;
             swApp.CommandInProgress = true; //告诉SolidWorks，现在是用外部程序调用命令
             swModel = (ModelDoc2)swApp.ActiveDoc;//获取当前打开的零件/装配体
-            //if(swModel.)
+            //判断不是装配体直接跳出
+            if (Path.GetExtension(swModel.GetPathName()).ToUpper()!=".SLDASM") return;
             swAssy = (AssemblyDoc)swModel;
             object configNames = null;
 
