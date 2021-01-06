@@ -31,43 +31,77 @@
             this.btnConnect = new System.Windows.Forms.Button();
             this.btnEditSwModel = new System.Windows.Forms.Button();
             this.btnEditSwAssy = new System.Windows.Forms.Button();
+            this.btnEditSubAssy = new System.Windows.Forms.Button();
+            this.btnExportDxf = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btnConnect
             // 
-            this.btnConnect.Location = new System.Drawing.Point(32, 36);
+            this.btnConnect.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnConnect.Location = new System.Drawing.Point(12, 12);
             this.btnConnect.Name = "btnConnect";
-            this.btnConnect.Size = new System.Drawing.Size(122, 45);
+            this.btnConnect.Size = new System.Drawing.Size(111, 45);
             this.btnConnect.TabIndex = 0;
-            this.btnConnect.Text = "打开/连接SW";
+            this.btnConnect.Text = "1.打开/连接SW";
+            this.btnConnect.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.btnConnect.UseVisualStyleBackColor = true;
             this.btnConnect.Click += new System.EventHandler(this.btnConnect_Click);
             // 
             // btnEditSwModel
             // 
-            this.btnEditSwModel.Location = new System.Drawing.Point(170, 36);
+            this.btnEditSwModel.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnEditSwModel.Location = new System.Drawing.Point(12, 64);
             this.btnEditSwModel.Name = "btnEditSwModel";
-            this.btnEditSwModel.Size = new System.Drawing.Size(122, 45);
+            this.btnEditSwModel.Size = new System.Drawing.Size(111, 42);
             this.btnEditSwModel.TabIndex = 0;
-            this.btnEditSwModel.Text = "修改零件";
+            this.btnEditSwModel.Text = "2.修改零件";
+            this.btnEditSwModel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.btnEditSwModel.UseVisualStyleBackColor = true;
             this.btnEditSwModel.Click += new System.EventHandler(this.btnEditSwModel_Click);
             // 
             // btnEditSwAssy
             // 
-            this.btnEditSwAssy.Location = new System.Drawing.Point(310, 38);
+            this.btnEditSwAssy.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnEditSwAssy.Location = new System.Drawing.Point(140, 64);
             this.btnEditSwAssy.Name = "btnEditSwAssy";
             this.btnEditSwAssy.Size = new System.Drawing.Size(111, 42);
             this.btnEditSwAssy.TabIndex = 1;
-            this.btnEditSwAssy.Text = "修改装配体";
+            this.btnEditSwAssy.Text = "3.修改装配体";
+            this.btnEditSwAssy.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.btnEditSwAssy.UseVisualStyleBackColor = true;
             this.btnEditSwAssy.Click += new System.EventHandler(this.btnEditSwAssy_Click);
+            // 
+            // btnEditSubAssy
+            // 
+            this.btnEditSubAssy.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnEditSubAssy.Location = new System.Drawing.Point(257, 64);
+            this.btnEditSubAssy.Name = "btnEditSubAssy";
+            this.btnEditSubAssy.Size = new System.Drawing.Size(111, 42);
+            this.btnEditSubAssy.TabIndex = 1;
+            this.btnEditSubAssy.Text = "4.修改子装配体";
+            this.btnEditSubAssy.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnEditSubAssy.UseVisualStyleBackColor = true;
+            this.btnEditSubAssy.Click += new System.EventHandler(this.btnEditSubAssy_Click);
+            // 
+            // btnExportDxf
+            // 
+            this.btnExportDxf.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnExportDxf.Location = new System.Drawing.Point(12, 112);
+            this.btnExportDxf.Name = "btnExportDxf";
+            this.btnExportDxf.Size = new System.Drawing.Size(111, 42);
+            this.btnExportDxf.TabIndex = 1;
+            this.btnExportDxf.Text = "5.导出钣金dxf图";
+            this.btnExportDxf.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnExportDxf.UseVisualStyleBackColor = true;
+            this.btnExportDxf.Click += new System.EventHandler(this.btnExportDxf_Click);
             // 
             // FrmMian
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.ClientSize = new System.Drawing.Size(411, 675);
+            this.Controls.Add(this.btnExportDxf);
+            this.Controls.Add(this.btnEditSubAssy);
             this.Controls.Add(this.btnEditSwAssy);
             this.Controls.Add(this.btnEditSwModel);
             this.Controls.Add(this.btnConnect);
@@ -82,6 +116,8 @@
         private System.Windows.Forms.Button btnConnect;
         private System.Windows.Forms.Button btnEditSwModel;
         private System.Windows.Forms.Button btnEditSwAssy;
+        private System.Windows.Forms.Button btnEditSubAssy;
+        private System.Windows.Forms.Button btnExportDxf;
     }
 }
 
