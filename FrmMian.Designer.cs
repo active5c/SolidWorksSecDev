@@ -62,7 +62,7 @@
             // btnEditSwAssy
             // 
             this.btnEditSwAssy.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnEditSwAssy.Location = new System.Drawing.Point(140, 64);
+            this.btnEditSwAssy.Location = new System.Drawing.Point(129, 64);
             this.btnEditSwAssy.Name = "btnEditSwAssy";
             this.btnEditSwAssy.Size = new System.Drawing.Size(111, 42);
             this.btnEditSwAssy.TabIndex = 1;
@@ -74,7 +74,7 @@
             // btnEditSubAssy
             // 
             this.btnEditSubAssy.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnEditSubAssy.Location = new System.Drawing.Point(257, 64);
+            this.btnEditSubAssy.Location = new System.Drawing.Point(246, 64);
             this.btnEditSubAssy.Name = "btnEditSubAssy";
             this.btnEditSubAssy.Size = new System.Drawing.Size(111, 42);
             this.btnEditSubAssy.TabIndex = 1;
@@ -90,7 +90,7 @@
             this.btnExportDxf.Name = "btnExportDxf";
             this.btnExportDxf.Size = new System.Drawing.Size(111, 42);
             this.btnExportDxf.TabIndex = 1;
-            this.btnExportDxf.Text = "5.导出钣金dxf图";
+            this.btnExportDxf.Text = "5-6.导出钣金dxf图";
             this.btnExportDxf.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.btnExportDxf.UseVisualStyleBackColor = true;
             this.btnExportDxf.Click += new System.EventHandler(this.btnExportDxf_Click);
@@ -99,7 +99,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(411, 675);
+            this.ClientSize = new System.Drawing.Size(366, 675);
             this.Controls.Add(this.btnExportDxf);
             this.Controls.Add(this.btnEditSubAssy);
             this.Controls.Add(this.btnEditSwAssy);

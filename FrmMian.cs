@@ -49,6 +49,8 @@ namespace SolidWorksSecDev
             //    string msg = "This message from C#. solidworks version is " + swApp.RevisionNumber();
             //    swApp.SendMsgToUser(msg);
             //}
+            StudyCode study=new StudyCode();
+            study.CADSharpP4(swApp);
         }
         /// <summary>
         /// 编辑零件
@@ -61,6 +63,8 @@ namespace SolidWorksSecDev
             if (swApp == null) return;
             swApp.CommandInProgress = true; //告诉SolidWorks，现在是用外部程序调用命令
             swModel = (ModelDoc2)swApp.ActiveDoc;//获取当前打开的零件
+            //判断为零件时继续执行，否则跳出
+            if (swModel.GetType() != (int)swDocumentTypes_e.swDocPART) return;
             swPartAlone = (PartDoc)swModel;
             object configNames = null;
 
@@ -98,7 +102,8 @@ namespace SolidWorksSecDev
             swApp.CommandInProgress = true; //告诉SolidWorks，现在是用外部程序调用命令
             swModel = (ModelDoc2)swApp.ActiveDoc;//获取当前打开的零件/装配体
             //判断不是装配体直接跳出
-            if (Path.GetExtension(swModel.GetPathName()).ToUpper()!=".SLDASM") return;
+            //if (Path.GetExtension(swModel.GetPathName()).ToUpper()!=".SLDASM") return;
+            if(swModel.GetType()!=(int)swDocumentTypes_e.swDocASSEMBLY)return;
             swAssy = (AssemblyDoc)swModel;
             object configNames = null;
 
@@ -138,7 +143,8 @@ namespace SolidWorksSecDev
             swApp.CommandInProgress = true; //告诉SolidWorks，现在是用外部程序调用命令
             swModel = (ModelDoc2)swApp.ActiveDoc;//获取当前打开的零件/装配体
             //判断不是装配体直接跳出
-            if (Path.GetExtension(swModel.GetPathName()).ToUpper() != ".SLDASM") return;
+            //if (Path.GetExtension(swModel.GetPathName()).ToUpper() != ".SLDASM") return;
+            if (swModel.GetType() != (int)swDocumentTypes_e.swDocASSEMBLY) return;
             swAssy = (AssemblyDoc)swModel;
             object configNames = null;
 
@@ -169,7 +175,7 @@ namespace SolidWorksSecDev
             }
         }
         /// <summary>
-        /// 导出钣金零件下料图
+        /// 导出钣金零件下料图/设定拉丝方向
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -179,9 +185,11 @@ namespace SolidWorksSecDev
             if (swApp == null) return;
             swApp.CommandInProgress = true; //告诉SolidWorks，现在是用外部程序调用命令
             swModel = (ModelDoc2)swApp.ActiveDoc;//获取当前打开的零件
+            //判断为零件时继续执行，否则跳出
+            if (swModel.GetType() != (int)swDocumentTypes_e.swDocPART) return;
             swPartAlone = (PartDoc)swModel;
 
-            string swModelName = swModel.GetPathName(); ;//装配体地址
+            string swModelName = swModel.GetPathName(); ;//零件地址
             string swDxfName= swModelName.Substring(0, swModelName.Length - 6)+"dxf";//Dxf图地址,或者dwg文件
             object varAlignment;//dxf图方向（钣金拉丝方向），下一节课讲
             double[] dataAlignment = new double[12];
@@ -199,12 +207,53 @@ namespace SolidWorksSecDev
             dataAlignment[9] = 0.0;
             dataAlignment[10] = 0.0;
             dataAlignment[11] = 1.0;
-
-            varAlignment = dataAlignment;
-
             try
             {
 
+                //预先绘制3D草图，重命名为xy，长边作为X轴，短边作为Y轴，用于限定拉丝方向
+                bool status = false;
+                if (swModel.Extension.SelectByID2("xy", "SKETCH", 0, 0, 0, false, 0, null, 0)) status = true;
+                if (status)
+                {
+                    Feature swFeature = swModel.SelectionManager.GetSelectedObject6(1, -1);
+                    Sketch swSketch = swFeature.GetSpecificFeature2();
+                    var swSketchPoints = swSketch.GetSketchPoints2();
+                    //获取草图中的所有点
+                    //用这三个点计算构成的线的长度，并判断长度，长边作为X轴，
+                    //画3D草图的时候一次性画出两条线，保证画点的顺序，否则会判断错误
+                    SketchPoint p0 = swSketchPoints[0];//最先画的点
+                    SketchPoint p1 = swSketchPoints[1];//第二点作为坐标原点
+                    SketchPoint p2 = swSketchPoints[2];//最后画的点
+                    //原点p1
+                    dataAlignment[0] = p1.X;
+                    dataAlignment[1] = p1.Y;
+                    dataAlignment[2] = p1.X;
+                    //判断长短确定XY方向
+                    double l1 = Math.Sqrt(Math.Pow(p0.X - p1.X, 2) + Math.Pow(p0.Y - p1.Y, 2) + Math.Pow(p0.Z - p1.Z, 2));
+                    double l2 = Math.Sqrt(Math.Pow(p2.X - p1.X, 2) + Math.Pow(p2.Y - p1.Y, 2) + Math.Pow(p2.Z - p1.Z, 2));
+                    if (l1 > l2)
+                    {
+                        //p1p0长，定义为x轴,p1p2短，定义为y轴
+                        dataAlignment[3] = p0.X - p1.X;
+                        dataAlignment[4] = p0.Y - p1.Y;
+                        dataAlignment[5] = p0.Z - p1.Z;
+                        dataAlignment[6] = p2.X - p1.X;
+                        dataAlignment[7] = p2.Y - p1.Y;
+                        dataAlignment[8] = p2.Z - p1.Z;
+                    }
+                    else
+                    {
+                        //p1p2长，定义为x轴,p1p0短，定义为y轴
+                        dataAlignment[3] = p2.X - p1.X;
+                        dataAlignment[4] = p2.Y - p1.Y;
+                        dataAlignment[5] = p2.Z - p1.Z;
+                        dataAlignment[6] = p0.X - p1.X;
+                        dataAlignment[7] = p0.Y - p1.Y;
+                        dataAlignment[8] = p0.Z - p1.Z;
+                    }
+                }
+                varAlignment = dataAlignment;
+                
                 //Export sheet metal to a single drawing file，将钣金导出到单个工程图文件
                 options = 1;  //include flat-pattern geometry
                 swPartAlone.ExportToDWG2(swDxfName, swModelName, (int)swExportToDWG_e.swExportToDWG_ExportSheetMetal, true, varAlignment, false, false, options, null);
