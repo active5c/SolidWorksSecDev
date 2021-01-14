@@ -21,7 +21,7 @@ namespace SolidWorksSecDev
             return swApp;
         }
 
-        public async static Task<SldWorks> GetApplicationAsync()
+        public static async Task<SldWorks> GetApplicationAsync()
         {
             if (swApp == null)
             {

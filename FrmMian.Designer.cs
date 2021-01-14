@@ -33,6 +33,7 @@
             this.btnEditSwAssy = new System.Windows.Forms.Button();
             this.btnEditSubAssy = new System.Windows.Forms.Button();
             this.btnExportDxf = new System.Windows.Forms.Button();
+            this.btnTraverseAssy = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btnConnect
@@ -86,7 +87,7 @@
             // btnExportDxf
             // 
             this.btnExportDxf.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnExportDxf.Location = new System.Drawing.Point(12, 112);
+            this.btnExportDxf.Location = new System.Drawing.Point(12, 118);
             this.btnExportDxf.Name = "btnExportDxf";
             this.btnExportDxf.Size = new System.Drawing.Size(111, 42);
             this.btnExportDxf.TabIndex = 1;
@@ -95,11 +96,24 @@
             this.btnExportDxf.UseVisualStyleBackColor = true;
             this.btnExportDxf.Click += new System.EventHandler(this.btnExportDxf_Click);
             // 
+            // btnTraverseAssy
+            // 
+            this.btnTraverseAssy.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnTraverseAssy.Location = new System.Drawing.Point(129, 118);
+            this.btnTraverseAssy.Name = "btnTraverseAssy";
+            this.btnTraverseAssy.Size = new System.Drawing.Size(111, 42);
+            this.btnTraverseAssy.TabIndex = 1;
+            this.btnTraverseAssy.Text = "7.遍历装配体导图";
+            this.btnTraverseAssy.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnTraverseAssy.UseVisualStyleBackColor = true;
+            this.btnTraverseAssy.Click += new System.EventHandler(this.btnTraverseAssy_Click);
+            // 
             // FrmMian
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(366, 675);
+            this.ClientSize = new System.Drawing.Size(366, 505);
+            this.Controls.Add(this.btnTraverseAssy);
             this.Controls.Add(this.btnExportDxf);
             this.Controls.Add(this.btnEditSubAssy);
             this.Controls.Add(this.btnEditSwAssy);
@@ -118,6 +132,7 @@
         private System.Windows.Forms.Button btnEditSwAssy;
         private System.Windows.Forms.Button btnEditSubAssy;
         private System.Windows.Forms.Button btnExportDxf;
+        private System.Windows.Forms.Button btnTraverseAssy;
     }
 }
 
