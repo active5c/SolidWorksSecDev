@@ -58,6 +58,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BasicCode.cs" />
     <Compile Include="ExportDxf.cs" />
     <Compile Include="FrmMian.cs">
       <SubType>Form</SubType>

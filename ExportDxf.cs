@@ -2,9 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using SolidWorks.Interop.sldworks;
 using SolidWorks.Interop.swconst;
@@ -13,14 +10,6 @@ namespace SolidWorksSecDev
 {
     public class ExportDxf
     {
-        ModelDoc2 swModel = default(ModelDoc2);//装配体或零件
-        PartDoc swPartDoc = default(PartDoc);//零件
-
-        AssemblyDoc swAssy = default(AssemblyDoc);//装配体
-        Component2 swComp = default(Component2);//子装配或零件
-
-        ModelDoc2 swPart = default(ModelDoc2);//子装配中的零件
-
         /// <summary>
         /// 遍历装配体导出钣金dxf下料图
         /// </summary>
@@ -28,8 +17,8 @@ namespace SolidWorksSecDev
         public void AssyExportDxf(SldWorks swApp)
         {
             Dictionary<string, int> sheetMetalDic = new Dictionary<string, int>();
-
-            swModel = (ModelDoc2)swApp.ActiveDoc;//获取当前打开的零件
+            
+            ModelDoc2 swModel = (ModelDoc2)swApp.ActiveDoc;//获取当前打开的零件
             if (swModel == null)
             {
                 MessageBox.Show("没有打开装配体");
@@ -43,7 +32,7 @@ namespace SolidWorksSecDev
             //遍历集合中的所有零部件对象，判断并获取需要导图的零件
             foreach (var item in compList)
             {
-                swComp = (Component2)item;
+                Component2 swComp = (Component2)item;
                 //判断需要导出下料图的零件：1.是否显示，2.是否被压缩，3.是否封套，4.是否为零件
                 if (swComp.Visible != (int)swComponentVisibilityState_e.swComponentVisible
                     || swComp.IsSuppressed() || swComp.IsEnvelope()
@@ -77,11 +66,12 @@ namespace SolidWorksSecDev
             {
                 int errors = 0;
                 int warnings = 0;
+
                 //打开模型
-                swPart = swApp.OpenDoc6(sheetMetal.Key, (int)swDocumentTypes_e.swDocPART,
+                ModelDoc2 swPart = swApp.OpenDoc6(sheetMetal.Key, (int)swDocumentTypes_e.swDocPART,
                     (int)swOpenDocOptions_e.swOpenDocOptions_Silent, "", ref errors, ref warnings);
+                
                 //导图
-                swPartDoc = (PartDoc)swPart;
                 string swModelName = swPart.GetPathName(); ;//零件地址
                 string swModelTitle = swPart.GetTitle();
                 //带后缀的情况
@@ -89,20 +79,39 @@ namespace SolidWorksSecDev
                 //判断不带后缀的情况
                 if (swModelTitle.Substring(swModelTitle.Length - 7).ToLower() != ".sldprt")
                     swDxfName = dxfPath + swModelTitle + ".dxf";
+
                 //导出零件
-                PartExportDxf(swPartDoc, swDxfName, swModelName);
+                ExportDxfMethod(swPart, swDxfName, swModelName);
                 //关闭零件
                 swApp.CloseDoc(sheetMetal.Key);
             }
             //清除字典
             sheetMetalDic.Clear();
         }
+        
+        /// <summary>
+        /// 单个零件导出钣金dxf下料图
+        /// </summary>
+        /// <param name="swApp"></param>
+        public void PartExportDxf(SldWorks swApp)
+        {
+            ModelDoc2 swModel = (ModelDoc2)swApp.ActiveDoc;//获取当前打开的零件
+            //判断为零件时继续执行，否则跳出
+            if (swModel.GetType() != (int)swDocumentTypes_e.swDocPART) return;
+
+            string swModelName = swModel.GetPathName(); ;//零件地址
+            string swDxfName = swModelName.Substring(0, swModelName.Length - 6) + "dxf";//Dxf图地址,或者dwg文件
+            //导出零件
+            ExportDxfMethod(swModel, swDxfName, swModelName);
+        }
 
         /// <summary>
-        /// 零件导出dxf图方法
+        /// 零件导出dxf图通用方法
         /// </summary>
-        public void PartExportDxf(PartDoc swPartDoc, string swDxfName, string swModelName)
+        public void ExportDxfMethod(ModelDoc2 swPart, string swDxfName, string swModelName)
         {
+            PartDoc swPartDoc = (PartDoc)swPart;
+
             object varAlignment;//dxf图方向（钣金拉丝方向），下一节课讲
             double[] dataAlignment = new double[12];
             int options;
@@ -122,11 +131,10 @@ namespace SolidWorksSecDev
 
             //预先绘制3D草图，重命名为xy，长边作为X轴，短边作为Y轴，用于限定拉丝方向
             bool status = false;
-            ModelDoc2 swPart2 = (ModelDoc2)swPartDoc;
-            if (swPart2.Extension.SelectByID2("xy", "SKETCH", 0, 0, 0, false, 0, null, 0)) status = true;
+            if (swPart.Extension.SelectByID2("xy", "SKETCH", 0, 0, 0, false, 0, null, 0)) status = true;
             if (status)
             {
-                Feature swFeature = swPart2.SelectionManager.GetSelectedObject6(1, -1);
+                Feature swFeature = swPart.SelectionManager.GetSelectedObject6(1, -1);
                 Sketch swSketch = swFeature.GetSpecificFeature2();
                 var swSketchPoints = swSketch.GetSketchPoints2();
                 //获取草图中的所有点
@@ -135,7 +143,8 @@ namespace SolidWorksSecDev
                 SketchPoint p0 = swSketchPoints[0];//最先画的点
                 SketchPoint p1 = swSketchPoints[1];//第二点作为坐标原点
                 SketchPoint p2 = swSketchPoints[2];//最后画的点
-                                                   //原点p1
+                
+                //原点p1
                 dataAlignment[0] = p1.X;
                 dataAlignment[1] = p1.Y;
                 dataAlignment[2] = p1.X;
@@ -175,9 +184,9 @@ namespace SolidWorksSecDev
         /// 递归方法
         /// </summary>
         /// <param name="swComp"></param>
-        private bool ParentCompState(Component2 swComp2)
+        private bool ParentCompState(Component2 swComp)
         {
-            Component2 swParentComp = swComp2.GetParent();//获取父装配体
+            Component2 swParentComp = swComp.GetParent();//获取父装配体
             //直接装配在总装中的零件，GetParent方法会返回null，参见方法的remarks，此时无需判断父装配体
             //不为null，则需要判断父装配体：1.是否显示，2.是否被压缩，3.是否封套
             if (swParentComp != null)
