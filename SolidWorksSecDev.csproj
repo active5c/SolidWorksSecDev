@@ -37,10 +37,6 @@
       <HintPath>packages\Solidworks.Interop.Basic.19.4.0\lib\net20\SolidWorks.Interop.sldworks.dll</HintPath>
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
-    <Reference Include="SolidWorks.Interop.swcommands, Version=27.4.0.72, Culture=neutral, PublicKeyToken=0fda92720ba7919f, processorArchitecture=MSIL">
-      <HintPath>packages\Solidworks.Interop.Basic.19.4.0\lib\net20\SolidWorks.Interop.swcommands.dll</HintPath>
-      <EmbedInteropTypes>True</EmbedInteropTypes>
-    </Reference>
     <Reference Include="SolidWorks.Interop.swconst, Version=27.4.0.72, Culture=neutral, PublicKeyToken=19f43e188e4269d8, processorArchitecture=MSIL">
       <HintPath>packages\Solidworks.Interop.Basic.19.4.0\lib\net20\SolidWorks.Interop.swconst.dll</HintPath>
       <EmbedInteropTypes>True</EmbedInteropTypes>

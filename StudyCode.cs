@@ -66,6 +66,7 @@ namespace SolidWorksSecDev
             swcompModelDoc.Save();
             swApp.QuitDoc(swcompModelDoc.GetTitle());
         }
+
         /// <summary>
         /// Can you split BOM?
         /// https://www.bilibili.com/video/BV1Lh41127Td?p=6
@@ -93,6 +94,38 @@ namespace SolidWorksSecDev
             swDrawingDoc.ActivateSheet("Sheet1");//激活第一张表
             swModel.Paste();//粘贴
         }
+
+        /// <summary>
+        /// Feature selection inside an assembly
+        /// 
+        /// </summary>
+        /// <param name="swApp"></param>
+        public void BlueByteP8(SldWorks swApp)
+        {
+            //get active model in the solidworks sessin
+            ModelDoc2 swModel = swApp.ActiveDoc;
+            AssemblyDoc swAssy = (AssemblyDoc)swModel;
+            //get an array of the top level components
+            var swComps = swAssy.GetComponents(true);
+            Component2 swComp = swComps[0];
+            //get the first feature of swComp
+            Feature swFeat = swComp.FirstFeature();
+            string selectionName = String.Empty;
+            //traverse first level
+            while (swFeat != null)
+            {
+                if (swFeat.GetTypeName2() == "RefPlane" && swFeat.Name == "Right Plane")
+                {
+                    string featType = String.Empty;
+                    selectionName = swFeat.GetNameForSelection(out featType);
+                    Debug.Print(selectionName);
+                }
+                swFeat = swFeat.GetNextFeature();
+            }
+            //select right plane
+            swModel.Extension.SelectByID2(selectionName, "PLANE", 0, 0, 0, false, 0, null, 0);
+        }
+
         /// <summary>
         /// delete the note of tool box in drawing
         /// https://www.bilibili.com/video/BV19K411M7Y7?p=3
@@ -128,6 +161,7 @@ namespace SolidWorksSecDev
                 swModel.EditDelete();//删除
             }
         }
+
         /// <summary>
         /// Creat a left hand version of a part,打开目录中的模型，创建配置，镜像零件
         /// https://www.bilibili.com/video/BV19K411M7Y7?p=4
@@ -153,8 +187,8 @@ namespace SolidWorksSecDev
             {
                 int errors = 0;
                 int warnings = 0;
-                ModelDoc2 swModel = swApp.OpenDoc6(item, (int) swDocumentTypes_e.swDocPART,
-                    (int) swOpenDocOptions_e.swOpenDocOptions_Silent, "", ref errors, ref warnings);
+                ModelDoc2 swModel = swApp.OpenDoc6(item, (int)swDocumentTypes_e.swDocPART,
+                    (int)swOpenDocOptions_e.swOpenDocOptions_Silent, "", ref errors, ref warnings);
                 //add another configuration
                 swModel.AddConfiguration3("Opposite", "", "",
                     (int)swConfigurationOptions2_e.swConfigOption_DoDisolveInBOM);
@@ -181,7 +215,130 @@ namespace SolidWorksSecDev
             swApp.SendMsgToUser("Done!");
         }
 
+        /// <summary>
+        /// Cylinder Length and Diameter Program//新建零件绘制一个圆柱形
+        /// https://www.bilibili.com/video/BV1M5411n7GH
+        /// </summary>
+        /// <param name="swApp"></param>
+        public void Mein3d(SldWorks swApp)
+        {
+            //Add a "Hello World!" pop-up box to a macro
+            //swApp.SendMsgToUser("Hello World!");
+            //understand the concept of:1.Type casting and Early binding
+            //获取用户默认模版
+            string defaultPartTemplate =
+                swApp.GetUserPreferenceStringValue((int)swUserPreferenceStringValue_e.swDefaultTemplatePart);
 
+            //Early binding,早期绑定
+            //create a part document
+            ModelDoc2 swModel = swApp.NewDocument(defaultPartTemplate, 0, 0, 0);
+            if (swModel == null) return;
+            //Type casting,类型转换
+            PartDoc swPartDoc = (PartDoc)swModel;
+
+            //SketchManager,FeatureManager,Creat first subroutine
+            //Open a sketch
+            swModel.Extension.SelectByID2("Front Plane", "PLANE", 0, 0, 0, false, 0, null, 0);
+            swModel.SketchManager.InsertSketch(true);
+            //create variables for the length and diameter of the cylinder
+            double cylinderLength = 120d / 1000d;
+            double cylinderDiameter = 20d / 1000d;
+            //draw a circle，画圆
+            swModel.SketchManager.CreateCircle(0, 0, 0, 0, cylinderDiameter / 2d, 0);
+            //extrude the cylinder,拉伸
+            swModel.FeatureManager.FeatureExtrusion3(true, false, false,
+                (int)swEndConditions_e.swEndCondBlind,
+                (int)swEndConditions_e.swEndCondBlind,
+                cylinderLength, 0, false, false, false, false,
+                0, 0, false, false, false, false, true, true, true,
+                (int)swStartConditions_e.swStartSketchPlane, 0, false);
+        }
+
+        /// <summary>
+        /// swept feature，扫掠特征的创建
+        /// https://www.bilibili.com/video/BV1vK411M7Fi
+        /// </summary>
+        /// <param name="swApp"></param>
+        public void MirzaCenanovic(SldWorks swApp)
+        {
+            //swApp.CloseAllDocuments(true);//DANGEROUS很危险，确保已经保存
+            //新建零件
+            ModelDoc2 swModel = swApp.NewPart();
+            //PartDoc swPartDoc = (PartDoc)swModel;
+            //create 3D sketch，创建3D草图
+            swModel.Insert3DSketch2(false);
+            //create lines，创建两条线
+            SketchSegment swLine1 = swModel.CreateLine2(0, 0, 0, 0, 0, 100d / 1000d);
+            SketchSegment swLine2 = swModel.CreateLine2(0, 0, 100d / 1000d, 0, 100d / 1000d, 100d / 1000d);
+            //create fillet，创建圆角
+            swLine1.Select(false);
+            swLine2.Select(true);
+            swModel.SketchFillet2(10d / 1000d, 0);
+            swModel.Insert3DSketch2(true);
+
+            //create sketch plane，根据点和法线创建平面
+            SketchLine line1 = (SketchLine) swLine1;
+            SketchPoint swPoint1 = line1.GetStartPoint2();
+            swLine1.Select(false);
+            swPoint1.Select(true);
+            swModel.CreatePlanePerCurveAndPassPoint3(true, true);
+            
+            //create profile sketch，创建扫掠截面草图
+            swModel.Extension.SelectByID2("Plane1", "PLANE", 0, 0, 0, false, 0, null, 0);
+            swModel.SelectionManager.GetSelectedObject6(1, -1);
+            swModel.BlankRefGeom();//hide the plane，隐藏创建的平面
+            swModel.SketchManager.InsertSketch(false);
+            swModel.SketchManager.CreateCircle(0, 0, 0, 5d / 1000d, 0, 0);
+            swModel.SketchManager.CreateCircle(0, 0, 0, 7d / 1000d, 0, 0);
+            swModel.SketchManager.InsertSketch(true);
+            
+            //swept feature，选中截面和引导线，创建扫掠特征
+            swModel.Extension.SelectByID2("Sketch1", "SKETCH", 0, 0, 0, false, 0, null, 0);
+            swModel.Extension.SelectByID2("3DSketch1", "SKETCH", 0, 0, 0, true, 0, null, 0);
+            swModel.FeatureManager.InsertProtrusionSwept3(false, false, 0, true, false,
+                 0, 0, false, 0, 0, 0, 0, true, false, false, 0, false);
+            
+        }
+
+        /// <summary>
+        /// 创建一个拉伸零件，然后添加自定义属性
+        /// https://www.bilibili.com/video/BV1C54y1W7d7?p=1
+        /// </summary>
+        /// <param name="swApp"></param>
+        public void SolidWorksAcademy2019P1(SldWorks swApp)
+        {
+            //新建零件
+            ModelDoc2 swModel = swApp.NewPart();
+            //重命名三个基准面，这个选择的方法是按照倒序选择的，0位是原点
+            Feature swFeat = swModel.FeatureByPositionReverse(3);
+            swFeat.Name = "Front";
+            swFeat = swModel.FeatureByPositionReverse(2);
+            swFeat.Name = "Top";
+            swFeat = swModel.FeatureByPositionReverse(1);
+            swFeat.Name = "Right";
+            //绘制两个圆
+            swModel.Extension.SelectByID2("Top", "PLANE", 0, 0, 0, false, 0, null, 0);
+            swModel.InsertSketch2(true);
+            swModel.CreateCircleByRadius2(0, 0, 0, 0.5);
+            swModel.CreateCircleByRadius2(0, 0, 0, 0.2);
+            swModel.InsertSketch2(true);
+            //
+            swFeat= swModel.FeatureByPositionReverse(0);
+            swFeat.Name = "PipeSketch";
+            swModel.Extension.SelectByID2("PipeSketch", "SKETCH", 0, 0, 0, false, 0, null, 0);
+            swFeat = swModel.FeatureManager.FeatureExtrusion3(true, false, false,
+                (int) swEndConditions_e.swEndCondBlind, 0, 0.8, 0, false, false, false, false, 0, 0, false, false,
+                false, false, false, false, false, 0, 0, false);
+            swFeat.Name = "PipeModel";
+            swModel.ForceRebuild3(true);
+            swModel.ViewZoomtofit2();
+            Configuration swConfig = swModel.GetActiveConfiguration();
+            CustomPropertyManager swCustPropMgr = swConfig.CustomPropertyManager;
+            swCustPropMgr.Add3("Description", (int) swCustomInfoType_e.swCustomInfoText, "Pipe",
+                (int)swCustomPropertyAddOption_e.swCustomPropertyDeleteAndAdd);
+            swCustPropMgr.Add3("Dimensions", (int)swCustomInfoType_e.swCustomInfoText, "800",
+                (int)swCustomPropertyAddOption_e.swCustomPropertyDeleteAndAdd);
+        }
 
     }
 }

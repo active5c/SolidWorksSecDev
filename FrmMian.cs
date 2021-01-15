@@ -33,14 +33,11 @@ namespace SolidWorksSecDev
             //异步方式
             swApp = await SolidWorksSingleton.GetApplicationAsync();
             if (swApp == null) return;
-            //if (swApp != null)
-            //{
-            //    swApp.SendMsgToUser("Solidworks version: "+ swApp.RevisionNumber());
-            //}
+            //if (swApp != null) swApp.SendMsgToUser("Solidworks version: "+ swApp.RevisionNumber());
 
-            //学习测试代码
+            //学习代码测试
             StudyCode study = new StudyCode();
-            study.CADSharpP4(swApp);
+            study.SolidWorksAcademy2019P1(swApp);
         }
 
         /// <summary>

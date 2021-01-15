@@ -41,9 +41,9 @@
             this.btnConnect.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.btnConnect.Location = new System.Drawing.Point(12, 12);
             this.btnConnect.Name = "btnConnect";
-            this.btnConnect.Size = new System.Drawing.Size(111, 45);
+            this.btnConnect.Size = new System.Drawing.Size(345, 45);
             this.btnConnect.TabIndex = 0;
-            this.btnConnect.Text = "1.打开/连接SW";
+            this.btnConnect.Text = "1.打开/连接SW+学习代码测试";
             this.btnConnect.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.btnConnect.UseVisualStyleBackColor = true;
             this.btnConnect.Click += new System.EventHandler(this.btnConnect_Click);
@@ -112,7 +112,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(366, 505);
+            this.ClientSize = new System.Drawing.Size(368, 505);
             this.Controls.Add(this.btnTraverseAssy);
             this.Controls.Add(this.btnExportDxf);
             this.Controls.Add(this.btnEditSubAssy);
