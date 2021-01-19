@@ -37,7 +37,7 @@ namespace SolidWorksSecDev
 
             //学习代码测试
             StudyCode study = new StudyCode();
-            study.SolidWorksAcademy2019P1(swApp);
+            study.SolidWorksAcademyP6(swApp);
         }
 
         /// <summary>

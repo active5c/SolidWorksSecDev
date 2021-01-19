@@ -277,12 +277,12 @@ namespace SolidWorksSecDev
             swModel.Insert3DSketch2(true);
 
             //create sketch plane，根据点和法线创建平面
-            SketchLine line1 = (SketchLine) swLine1;
+            SketchLine line1 = (SketchLine)swLine1;
             SketchPoint swPoint1 = line1.GetStartPoint2();
             swLine1.Select(false);
             swPoint1.Select(true);
             swModel.CreatePlanePerCurveAndPassPoint3(true, true);
-            
+
             //create profile sketch，创建扫掠截面草图
             swModel.Extension.SelectByID2("Plane1", "PLANE", 0, 0, 0, false, 0, null, 0);
             swModel.SelectionManager.GetSelectedObject6(1, -1);
@@ -291,21 +291,21 @@ namespace SolidWorksSecDev
             swModel.SketchManager.CreateCircle(0, 0, 0, 5d / 1000d, 0, 0);
             swModel.SketchManager.CreateCircle(0, 0, 0, 7d / 1000d, 0, 0);
             swModel.SketchManager.InsertSketch(true);
-            
+
             //swept feature，选中截面和引导线，创建扫掠特征
             swModel.Extension.SelectByID2("Sketch1", "SKETCH", 0, 0, 0, false, 0, null, 0);
             swModel.Extension.SelectByID2("3DSketch1", "SKETCH", 0, 0, 0, true, 0, null, 0);
             swModel.FeatureManager.InsertProtrusionSwept3(false, false, 0, true, false,
                  0, 0, false, 0, 0, 0, 0, true, false, false, 0, false);
-            
+
         }
 
         /// <summary>
         /// 创建一个拉伸零件，然后添加自定义属性
-        /// https://www.bilibili.com/video/BV1C54y1W7d7?p=1
+        /// https://www.bilibili.com/video/BV1C54y1W7d7?p=2
         /// </summary>
         /// <param name="swApp"></param>
-        public void SolidWorksAcademy2019P1(SldWorks swApp)
+        public void SolidWorksAcademy2019P2(SldWorks swApp)
         {
             //新建零件
             ModelDoc2 swModel = swApp.NewPart();
@@ -323,22 +323,318 @@ namespace SolidWorksSecDev
             swModel.CreateCircleByRadius2(0, 0, 0, 0.2);
             swModel.InsertSketch2(true);
             //
-            swFeat= swModel.FeatureByPositionReverse(0);
+            swFeat = swModel.FeatureByPositionReverse(0);
             swFeat.Name = "PipeSketch";
             swModel.Extension.SelectByID2("PipeSketch", "SKETCH", 0, 0, 0, false, 0, null, 0);
             swFeat = swModel.FeatureManager.FeatureExtrusion3(true, false, false,
-                (int) swEndConditions_e.swEndCondBlind, 0, 0.8, 0, false, false, false, false, 0, 0, false, false,
+                (int)swEndConditions_e.swEndCondBlind, 0, 0.8, 0, false, false, false, false, 0, 0, false, false,
                 false, false, false, false, false, 0, 0, false);
             swFeat.Name = "PipeModel";
             swModel.ForceRebuild3(true);
             swModel.ViewZoomtofit2();
             Configuration swConfig = swModel.GetActiveConfiguration();
             CustomPropertyManager swCustPropMgr = swConfig.CustomPropertyManager;
-            swCustPropMgr.Add3("Description", (int) swCustomInfoType_e.swCustomInfoText, "Pipe",
+            swCustPropMgr.Add3("Description", (int)swCustomInfoType_e.swCustomInfoText, "Pipe",
                 (int)swCustomPropertyAddOption_e.swCustomPropertyDeleteAndAdd);
             swCustPropMgr.Add3("Dimensions", (int)swCustomInfoType_e.swCustomInfoText, "800",
                 (int)swCustomPropertyAddOption_e.swCustomPropertyDeleteAndAdd);
         }
 
+        /// <summary>
+        /// 绘制一个钣金零件，打孔，绘制圆角，定义装配面
+        /// https://www.bilibili.com/video/BV1C54y1W7d7?p=5
+        /// </summary>
+        public void SolidWorksAcademyP5CreateAnglePart(SldWorks swApp)
+        {
+            //定义参数,可以从窗体中获取参数，或者其他数据源
+            double xLength = 100d / 1000d;
+            double yLength = 200d / 1000d;
+            double width = 125d / 1000d;
+            double thickness = 8d / 1000d;
+
+            double boltHole = 7.5d / 1000d;
+            double pipeHole = 25.5d / 1000d;
+            double rad1 = 15d / 1000d;
+            double rad2 = 20d / 1000d;
+            double x1 = 25d / 1000d;
+            double x2 = 25d / 1000d;
+
+            string mateRef1 = "Ref1";
+            string mateRefHole = "RefHole";
+
+            string targetFolder = @"E:\Videos\SolidWorks Secondary Development\WorksAcademyP4";
+            string fileName = "AnglePart";
+
+
+            //获取用户默认模版
+            string defaultPartTemplate =
+                swApp.GetUserPreferenceStringValue((int)swUserPreferenceStringValue_e.swDefaultTemplatePart);
+
+            ModelDoc2 swModel = swApp.NewDocument(defaultPartTemplate, 0, 0, 0);
+            if (swModel == null) return;
+
+            Feature swFeat = swModel.FeatureByPositionReverse(3);
+            swFeat.Name = "Front";
+            swModel.Extension.SelectByID2("Front", "PLANE", 0, 0, 0, false, 0, null, 0);
+
+            swModel.InsertSketch2(true);
+            swModel.CreateLine2(0, 0, 0, xLength, 0, 0);
+            //swModel.AddDimension2(0, 0, 0);
+            swModel.CreateLine2(0, 0, 0, 0, yLength, 0);
+            //swModel.AddDimension2(0, 0, 0);
+
+            //int markHorizontal = 2;
+            //int markVertical = 4;
+            //swModel.Extension.SelectByID2("Point1<Origin", "EXTSKETCHSEGMENT", 0, 0, 0, false, markHorizontal | markVertical, null, 0);            
+            //swModel.SketchManager.FullyDefineSketch(true, true,
+            //    (int)swSketchFullyDefineRelationType_e.swSketchFullyDefineRelationType_Vertical |
+            //    (int)swSketchFullyDefineRelationType_e.swSketchFullyDefineRelationType_Horizontal, true,
+            //    (int)swAutodimScheme_e.swAutodimSchemeBaseline, null,
+            //    (int)swAutodimScheme_e.swAutodimSchemeBaseline, null,
+            //    (int)swAutodimHorizontalPlacement_e.swAutodimHorizontalPlacementBelow,
+            //    (int)swAutodimVerticalPlacement_e.swAutodimVerticalPlacementLeft);
+
+            object datumDisp = "Point1@Origin";
+            swModel.SketchManager.FullyDefineSketch(true, true,
+                (int)swSketchFullyDefineRelationType_e.swSketchFullyDefineRelationType_Vertical |
+                (int)swSketchFullyDefineRelationType_e.swSketchFullyDefineRelationType_Horizontal, true,
+                (int)swAutodimScheme_e.swAutodimSchemeBaseline, datumDisp,
+                (int)swAutodimScheme_e.swAutodimSchemeBaseline, datumDisp,
+                (int)swAutodimHorizontalPlacement_e.swAutodimHorizontalPlacementBelow,
+                (int)swAutodimVerticalPlacement_e.swAutodimVerticalPlacementLeft);
+
+            swModel.InsertSketch2(true);
+
+            swFeat = swModel.FeatureByPositionReverse(0);
+            swFeat.Name = "Sketch1";
+            swModel.Extension.SelectByID2("Sketch1", "SKETCH", 0, 0, 0, false, 0, null, 0);
+            //基体法兰
+            swModel.FeatureManager.InsertSheetMetalBaseFlange2(thickness, false, thickness, width, 0, true, 0, 0, 0, null, false, 0, 0, 0, 0, false, false, false, false);
+
+            //change entity name
+            swModel.Extension.SelectByID2("", "FACE", thickness, yLength / 2, -width / 2, false, 0, null, 0);
+            SelectionMgr swSelMgr = swModel.SelectionManager;
+            Face2 swFace = swSelMgr.GetSelectedObject6(1, -1);
+            PartDoc swPartDoc = (PartDoc)swModel;
+            swPartDoc.SetEntityName(swFace, mateRef1);
+
+            swModel.Extension.SelectByID2("", "FACE", xLength / 2, thickness, -width / 2, false, 0, null, 0);
+            swModel.InsertSketch2(true);
+            swModel.CreateCircleByRadius2(xLength - x1, x2, 0, boltHole);
+            swModel.CreateCircleByRadius2(xLength - x1, width - x2, 0, boltHole);
+            swModel.InsertSketch2(true);
+            //拉伸切除
+            swModel.FeatureManager.FeatureCut3(true, false, false,
+                (int)swEndConditions_e.swEndCondThroughAll,
+                (int)swEndConditions_e.swEndCondBlind, 0, 0, false, false, false, false, 0, 0,
+                false, false, false, false, false, true, true, false, false, false,
+                (int)swEndConditions_e.swEndCondMidPlane, 0, true);
+
+            Entity swEntity = swPartDoc.GetEntityByName(mateRef1, (int)swSelectType_e.swSelFACES);
+            swEntity.Select4(false, null);
+            swModel.InsertSketch2(true);
+            swModel.CreateCircleByRadius2(width / 2, yLength - (pipeHole * 2), 0, pipeHole);
+            swModel.AddDiameterDimension(0, 0, 0);
+            swModel.InsertSketch2(true);
+            //拉伸切除
+            swModel.FeatureManager.FeatureCut3(true, false, false,
+                (int)swEndConditions_e.swEndCondThroughAll,
+                (int)swEndConditions_e.swEndCondBlind, 0, 0, false, false, false, false, 0, 0,
+                false, false, false, false, false, true, true, false, false, false,
+                (int)swEndConditions_e.swEndCondMidPlane, 0, true);
+
+            //change entity name
+            swModel.Extension.SelectByID2("", "FACE", thickness / 2, yLength - pipeHole, -width / 2, false, 0, null, 0);
+            swFace = swSelMgr.GetSelectedObject6(1, -1);
+            swPartDoc.SetEntityName(swFace, mateRefHole);
+
+            //圆角特征
+            swModel.Extension.SelectByID2("", "EDGE", xLength, thickness / 2, 0, false, 0, null, 0);
+            swModel.Extension.SelectByID2("", "EDGE", xLength, thickness / 2, -width, true, 0, null, 0);
+            swModel.FeatureManager.FeatureFillet3((int)swFeatureFilletOptions_e.swFeatureFilletUniformRadius, rad2,
+                0, 0, 0, 0, 0, null, null, null, null, null, null, null);
+            swModel.Extension.SelectByID2("", "EDGE", thickness / 2, yLength, 0, false, 0, null, 0);
+            swModel.Extension.SelectByID2("", "EDGE", thickness / 2, yLength, -width, true, 0, null, 0);
+            swModel.FeatureManager.FeatureFillet3((int)swFeatureFilletOptions_e.swFeatureFilletUniformRadius, rad1,
+                0, 0, 0, 0, 0, null, null, null, null, null, null, null);
+
+            swModel.ClearSelection2(true);
+            swModel.ViewZoomtofit2();
+
+            string root = targetFolder;
+            if (!Directory.Exists(root)) Directory.CreateDirectory(root);
+
+            swModel.SaveAs3(targetFolder + "\\" + fileName + ".sldprt", (int)swSaveAsVersion_e.swSaveAsCurrentVersion,
+                (int)swSaveAsOptions_e.swSaveAsOptions_CopyAndOpen);
+            swApp.CloseDoc(fileName + ".sldprt");
+        }
+
+        /// <summary>
+        /// 绘制一个管件，定义装配面
+        /// https://www.bilibili.com/video/BV1C54y1W7d7?p=5
+        /// </summary>
+        public void SolidWorksAcademyP5CreatePipe(SldWorks swApp)
+        {
+            //定义参数,可以从窗体中获取参数，或者其他数据源
+            double outsideDiameter = 50d / 1000d;
+            double insideDiameter = 40d / 1000d;
+            double length = 50d / 1000d;
+
+            string mateOutsideFace = "PipeOutsideFace";
+            string mateBase = "PipeFace";
+
+            string targetFolder = @"E:\Videos\SolidWorks Secondary Development\WorksAcademyP4";
+            string fileName = "Pipe";
+
+            //获取用户默认模版
+            string defaultPartTemplate =
+                swApp.GetUserPreferenceStringValue((int)swUserPreferenceStringValue_e.swDefaultTemplatePart);
+
+            ModelDoc2 swModel = swApp.NewDocument(defaultPartTemplate, 0, 0, 0);
+            if (swModel == null) return;
+
+            Feature swFeat = swModel.FeatureByPositionReverse(3);
+            swFeat.Name = "Front";
+            swModel.Extension.SelectByID2("Front", "PLANE", 0, 0, 0, false, 0, null, 0);
+
+            swModel.InsertSketch2(true);
+            swModel.CreateCircleByRadius2(0, 0, 0, insideDiameter / 2d);
+            swModel.CreateCircleByRadius2(0, 0, 0, outsideDiameter / 2d);
+            swModel.InsertSketch2(true);
+
+            swFeat = swModel.FeatureManager.FeatureExtrusion3(true, false, false, 0, 0, length, 0, false, false, false,
+                false, 0, 0, false, false, false, false, false, false, false, 0, 0, false);
+
+            //change entity name
+            swModel.Extension.SelectByID2("", "FACE", outsideDiameter / 2, 0, length / 2, false, 0, null, 0);
+            SelectionMgr swSelMgr = swModel.SelectionManager;
+            Face2 swFace = swSelMgr.GetSelectedObject6(1, -1);
+            PartDoc swPartDoc = (PartDoc)swModel;
+            swPartDoc.SetEntityName(swFace, mateOutsideFace);
+            //change entity name
+            swModel.Extension.SelectByID2("", "FACE", insideDiameter / 2 + (outsideDiameter - insideDiameter) / 4, 0, 0, false, 0, null, 0);
+            swFace = swSelMgr.GetSelectedObject6(1, -1);
+            swPartDoc.SetEntityName(swFace, mateBase);
+
+            swModel.ClearSelection2(true);
+            swModel.ViewZoomtofit2();
+
+            string root = targetFolder;
+            if (!Directory.Exists(root)) Directory.CreateDirectory(root);
+
+            swModel.SaveAs3(targetFolder + "\\" + fileName + ".sldprt", (int)swSaveAsVersion_e.swSaveAsCurrentVersion,
+                (int)swSaveAsOptions_e.swSaveAsOptions_CopyAndOpen);
+            swApp.CloseDoc(fileName + ".sldprt");
+
+        }
+
+        /// <summary>
+        /// 将钣金和管件装配在一起
+        /// https://www.bilibili.com/video/BV1C54y1W7d7?p=6
+        /// </summary>
+        public void SolidWorksAcademyP6(SldWorks swApp)
+        {
+            //调用上面两个方法，创建两个零件
+            SolidWorksAcademyP5CreateAnglePart(swApp);
+            SolidWorksAcademyP5CreatePipe(swApp);
+
+            //开始装配
+            string targetFolder = @"E:\Videos\SolidWorks Secondary Development\WorksAcademyP4";
+            string fileName = "TestAssembly";
+            string pipeFileName = "Pipe";
+            string anglePartFileName = "AnglePart";
+
+            //获取用户默认模版
+            string defaultAssemblyTemplate =
+                swApp.GetUserPreferenceStringValue((int)swUserPreferenceStringValue_e.swDefaultTemplateAssembly);
+
+            ModelDoc2 swModel = swApp.NewDocument(defaultAssemblyTemplate, 0, 0, 0);
+            if (swModel == null) return;
+            AssemblyDoc swAssy = (AssemblyDoc) swModel;
+
+            string[] xCompNames=new string[2];
+            xCompNames[0] = targetFolder+"\\"+pipeFileName+".sldprt";
+            xCompNames[1] = targetFolder + "\\" + anglePartFileName + ".sldprt";
+            object compNames = xCompNames;
+
+            string[] xCoorSysNames=new string[2];
+            xCoorSysNames[0] = "Coordinate System1";
+            xCoorSysNames[1] = "Coordinate System1";
+            object coorSysName = xCoorSysNames;
+            
+            double pipleLength = 50d / 1000d;
+            double angelPartyLength = 200d / 1000d;
+            var tMatrix=new double[]
+            {
+                0,0,1,
+                0,1,0,
+                -1,0,0,
+                pipleLength,angelPartyLength,0,
+                0,0,0,0,
+                1,0,0,
+                0,1,0,
+                0,0,1,
+                0,0,0,
+                0,0,0,0
+            };
+            object transformationMatrix = tMatrix;
+
+            swAssy.AddComponents3(compNames, transformationMatrix, coorSysName);
+
+            string comp = anglePartFileName + "-1@" + fileName;
+            swModel.Extension.SelectByID2(comp, "COMPONENT", 0, 0, 0, false, 0, null, 0);
+            swAssy.FixComponent();
+
+            string mateRef1 = "Ref1";
+            string mateRefHole = "RefHole";
+            string mateOutsideFace = "PipeOutsideFace";
+            string mateBase = "PipeFace";
+
+            Component2 swComp = swAssy.GetComponentByName(anglePartFileName + "-1");
+            ModelDoc2 swCompModel = swComp.GetModelDoc2();
+            PartDoc swCompPart = (PartDoc) swCompModel;
+            Entity swEntity = swCompPart.GetEntityByName(mateRefHole, (int) swSelectType_e.swSelFACES);
+            Entity swFace1 = swComp.GetCorrespondingEntity(swEntity);
+            swEntity = swCompPart.GetEntityByName(mateRef1, (int)swSelectType_e.swSelFACES);
+            Entity swFace3 = swComp.GetCorrespondingEntity(swEntity);
+
+            swComp = swAssy.GetComponentByName(pipeFileName + "-1");
+            swCompModel = swComp.GetModelDoc2();
+            swCompPart = (PartDoc) swCompModel;
+            swEntity = swCompPart.GetEntityByName(mateOutsideFace, (int) swSelectType_e.swSelFACES);
+            Entity swFace2 = swComp.GetCorrespondingEntity(swEntity);
+            swEntity = swCompPart.GetEntityByName(mateBase, (int)swSelectType_e.swSelFACES);
+            Entity swFace4 = swComp.GetCorrespondingEntity(swEntity);
+            //同心配合
+            int errorCode;
+            swFace1.Select4(false, null);
+            swFace2.Select4(true, null);
+            swAssy.AddMate3((int) swMateType_e.swMateCONCENTRIC, (int) swMateAlign_e.swMateAlignALIGNED, false, 0, 0, 0,0, 0, 0, 0, 0, false, out errorCode);
+            //距离配合
+            double thickness = 8d / 1000d;
+            swFace3.Select4(false, null);
+            swFace4.Select4(true, null);
+            swAssy.AddMate3((int)swMateType_e.swMateDISTANCE, (int)swMateAlign_e.swMateAlignALIGNED, false, thickness, thickness, thickness, 0, 0, 0, 0, 0, false, out errorCode);
+
+            swModel.ViewZoomtofit2();
+            swModel.ForceRebuild3(false);
+            string root = targetFolder;
+            if (!Directory.Exists(root)) Directory.CreateDirectory(root);
+
+            swModel.SaveAs3(targetFolder + "\\" + fileName + ".sldasm", (int)swSaveAsVersion_e.swSaveAsCurrentVersion,
+                (int)swSaveAsOptions_e.swSaveAsOptions_CopyAndOpen);
+            swApp.CloseDoc(fileName + ".sldasm");
+            Process.Start("explorer.exe", targetFolder);
+        }
+
+        /// <summary>
+        /// 
+        /// https://www.bilibili.com/video/BV1oX4y1N74h?p=1
+        /// </summary>
+        /// <param name="swApp"></param>
+        public void CADCoderP1(SldWorks swApp)
+        {
+            
+        }
     }
 }
