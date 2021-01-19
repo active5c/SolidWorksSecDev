@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using SolidWorks.Interop.sldworks;
@@ -97,7 +98,7 @@ namespace SolidWorksSecDev
 
         /// <summary>
         /// Feature selection inside an assembly
-        /// 
+        /// https://www.bilibili.com/video/BV1Lh41127Td?p=8
         /// </summary>
         /// <param name="swApp"></param>
         public void BlueByteP8(SldWorks swApp)
@@ -550,21 +551,21 @@ namespace SolidWorksSecDev
 
             ModelDoc2 swModel = swApp.NewDocument(defaultAssemblyTemplate, 0, 0, 0);
             if (swModel == null) return;
-            AssemblyDoc swAssy = (AssemblyDoc) swModel;
+            AssemblyDoc swAssy = (AssemblyDoc)swModel;
 
-            string[] xCompNames=new string[2];
-            xCompNames[0] = targetFolder+"\\"+pipeFileName+".sldprt";
+            string[] xCompNames = new string[2];
+            xCompNames[0] = targetFolder + "\\" + pipeFileName + ".sldprt";
             xCompNames[1] = targetFolder + "\\" + anglePartFileName + ".sldprt";
             object compNames = xCompNames;
 
-            string[] xCoorSysNames=new string[2];
+            string[] xCoorSysNames = new string[2];
             xCoorSysNames[0] = "Coordinate System1";
             xCoorSysNames[1] = "Coordinate System1";
             object coorSysName = xCoorSysNames;
-            
+
             double pipleLength = 50d / 1000d;
             double angelPartyLength = 200d / 1000d;
-            var tMatrix=new double[]
+            var tMatrix = new double[]
             {
                 0,0,1,
                 0,1,0,
@@ -592,16 +593,16 @@ namespace SolidWorksSecDev
 
             Component2 swComp = swAssy.GetComponentByName(anglePartFileName + "-1");
             ModelDoc2 swCompModel = swComp.GetModelDoc2();
-            PartDoc swCompPart = (PartDoc) swCompModel;
-            Entity swEntity = swCompPart.GetEntityByName(mateRefHole, (int) swSelectType_e.swSelFACES);
+            PartDoc swCompPart = (PartDoc)swCompModel;
+            Entity swEntity = swCompPart.GetEntityByName(mateRefHole, (int)swSelectType_e.swSelFACES);
             Entity swFace1 = swComp.GetCorrespondingEntity(swEntity);
             swEntity = swCompPart.GetEntityByName(mateRef1, (int)swSelectType_e.swSelFACES);
             Entity swFace3 = swComp.GetCorrespondingEntity(swEntity);
 
             swComp = swAssy.GetComponentByName(pipeFileName + "-1");
             swCompModel = swComp.GetModelDoc2();
-            swCompPart = (PartDoc) swCompModel;
-            swEntity = swCompPart.GetEntityByName(mateOutsideFace, (int) swSelectType_e.swSelFACES);
+            swCompPart = (PartDoc)swCompModel;
+            swEntity = swCompPart.GetEntityByName(mateOutsideFace, (int)swSelectType_e.swSelFACES);
             Entity swFace2 = swComp.GetCorrespondingEntity(swEntity);
             swEntity = swCompPart.GetEntityByName(mateBase, (int)swSelectType_e.swSelFACES);
             Entity swFace4 = swComp.GetCorrespondingEntity(swEntity);
@@ -609,7 +610,7 @@ namespace SolidWorksSecDev
             int errorCode;
             swFace1.Select4(false, null);
             swFace2.Select4(true, null);
-            swAssy.AddMate3((int) swMateType_e.swMateCONCENTRIC, (int) swMateAlign_e.swMateAlignALIGNED, false, 0, 0, 0,0, 0, 0, 0, 0, false, out errorCode);
+            swAssy.AddMate3((int)swMateType_e.swMateCONCENTRIC, (int)swMateAlign_e.swMateAlignALIGNED, false, 0, 0, 0, 0, 0, 0, 0, 0, false, out errorCode);
             //距离配合
             double thickness = 8d / 1000d;
             swFace3.Select4(false, null);
@@ -628,13 +629,266 @@ namespace SolidWorksSecDev
         }
 
         /// <summary>
-        /// 
-        /// https://www.bilibili.com/video/BV1oX4y1N74h?p=1
+        /// P1以用户设置的默认模版，新建一个零件
+        /// P2在草图中创建一个圆弧slot
+        /// https://www.bilibili.com/video/BV1oX4y1N74h?p=2
         /// </summary>
-        /// <param name="swApp"></param>
-        public void CADCoderP1(SldWorks swApp)
+        public void CADCoderP2(SldWorks swApp)
         {
-            
+            //获取用户默认模版
+            //get the default location of part template
+            string defaultPartTemplate =
+                swApp.GetUserPreferenceStringValue((int)swUserPreferenceStringValue_e.swDefaultTemplatePart);
+            //set the solidworks document to new part document
+            ModelDoc2 swModel = swApp.NewDocument(defaultPartTemplate, 0, 0, 0);
+            if (swModel == null) return;
+            //select front plane
+            swModel.Extension.SelectByID2("Front Plane", "PLANE", 0, 0, 0, false, 0, null, 0);
+            //insert sketch into select plane
+            swModel.InsertSketch2(true);
+            //create a centerpoint arc slot
+            SketchSlot swSketchSlot = swModel.SketchManager.CreateSketchSlot(
+                (int)swSketchSlotCreationType_e.swSketchSlotCreationType_arc,
+                (int)swSketchSlotLengthType_e.swSketchSlotLengthType_CenterCenter,
+                0.5, 0, 0, 0, -1, 0, 0, 1, 0, 0, -1, false);
+            swModel.InsertSketch2(true);
+            //de-select created centerpoint arc slot
+            swModel.ClearSelection2(true);
+            //zoom to fit screen in solidworks window
+            swModel.ViewZoomtofit2();
+        }
+
+        /// <summary>
+        /// P3在草图中创建样条曲线
+        /// https://www.bilibili.com/video/BV1oX4y1N74h?p=3
+        /// </summary>
+        public void CADCoderP3(SldWorks swApp)
+        {
+            string defaultPartTemplate =
+                swApp.GetUserPreferenceStringValue((int)swUserPreferenceStringValue_e.swDefaultTemplatePart);
+            ModelDoc2 swModel = swApp.NewDocument(defaultPartTemplate, 0, 0, 0);
+            if (swModel == null) return;
+            swModel.Extension.SelectByID2("Front Plane", "PLANE", 0, 0, 0, false, 0, null, 0);
+            swModel.InsertSketch2(true);
+            //直接使用list接收点的坐标，在使用的时候转换成数组pointArray.ToArray()
+            List<double> pointArray = new List<double>();
+            for (int i = 0; i < 10; i++)
+            {
+                //故意使用int类型损失精度，制造样条曲线的点（不在一条直线上）
+                int incrementFactor = (int)(i * 0.5);
+                double x = i;
+                double y = x + incrementFactor;
+                double z = 0;
+                pointArray.Add(x);
+                pointArray.Add(y);
+                pointArray.Add(z);
+                //create a sketch point using x,y,z variable
+                swModel.SketchManager.CreatePoint(x, y, z);
+            }
+            swModel.ClearSelection2(true);
+            //没必要了
+            //Sketch swSketch = swModel.SketchManager.ActiveSketch;
+            ////get all the sketch point in this active sketch and store them into our varriant type variable
+            //var sketchPointArray = swSketch.GetSketchPoints2();
+            //foreach (var item in sketchPointArray)
+            //{
+            //    SketchPoint swPoint = (SketchPoint) item;
+            //}
+            //根据点坐标的数组，创建样条曲线
+            swModel.SketchManager.CreateSpline2(pointArray.ToArray(), true);
+            swModel.InsertSketch2(true);
+            swModel.ViewZoomtofit2();
+        }
+
+        /// <summary>
+        /// P4在草图中创建矩形并绘制倒圆角
+        /// https://www.bilibili.com/video/BV1oX4y1N74h?p=4
+        /// </summary>
+        public void CADCoderP4(SldWorks swApp)
+        {
+            string defaultPartTemplate =
+                swApp.GetUserPreferenceStringValue((int)swUserPreferenceStringValue_e.swDefaultTemplatePart);
+            ModelDoc2 swModel = swApp.NewDocument(defaultPartTemplate, 0, 0, 0);
+            if (swModel == null) return;
+            swModel.Extension.SelectByID2("Front Plane", "PLANE", 0, 0, 0, false, 0, null, 0);
+            swModel.InsertSketch2(true);
+            //绘制矩形
+            swModel.SketchManager.CreateCornerRectangle(0, 1, 0, 1, 0, 0);
+            swModel.ClearSelection2(true);
+            //选择点
+            swModel.Extension.SelectByID2("Point1", "SKETCHPOINT", 0, 0, 0, false, 0, null, 0);
+            //绘制倒圆角
+            swModel.SketchManager.CreateFillet(0.1, (int)swConstrainedCornerAction_e.swConstrainedCornerDeleteGeometry);
+            swModel.InsertSketch2(true);
+            swModel.ViewZoomtofit2();
+        }
+
+        /// <summary>
+        /// P5在草图中创建矩形并绘制倒斜角
+        /// https://www.bilibili.com/video/BV1oX4y1N74h?p=5
+        /// </summary>
+        public void CADCoderP5(SldWorks swApp)
+        {
+            string defaultPartTemplate =
+                swApp.GetUserPreferenceStringValue((int)swUserPreferenceStringValue_e.swDefaultTemplatePart);
+            ModelDoc2 swModel = swApp.NewDocument(defaultPartTemplate, 0, 0, 0);
+            if (swModel == null) return;
+            swModel.Extension.SelectByID2("Front Plane", "PLANE", 0, 0, 0, false, 0, null, 0);
+            swModel.InsertSketch2(true);
+            //绘制矩形
+            swModel.SketchManager.CreateCornerRectangle(0, 1, 0, 1, 0, 0);
+            swModel.ClearSelection2(true);
+            //选择点
+            swModel.Extension.SelectByID2("Point1", "SKETCHPOINT", 0, 0, 0, false, 0, null, 0);
+            //绘制倒斜角
+            swModel.SketchManager.CreateChamfer((int)swSketchChamferType_e.swSketchChamfer_DistanceDistance,0.1, 0.2);
+            swModel.InsertSketch2(true);
+            //视图
+            swModel.ShowNamedView2("", (int)swStandardViews_e.swFrontView);
+            swModel.ViewZoomtofit2();
+        }
+
+        /// <summary>
+        /// P6在草图中绘制两条直线，然后裁减/延长
+        /// https://www.bilibili.com/video/BV1oX4y1N74h?p=6
+        /// </summary>
+        public void CADCoderP6(SldWorks swApp)
+        {
+            string defaultPartTemplate =
+                swApp.GetUserPreferenceStringValue((int)swUserPreferenceStringValue_e.swDefaultTemplatePart);
+            ModelDoc2 swModel = swApp.NewDocument(defaultPartTemplate, 0, 0, 0);
+            if (swModel == null) return;
+            swModel.Extension.SelectByID2("Front Plane", "PLANE", 0, 0, 0, false, 0, null, 0);
+            swModel.InsertSketch2(true);
+            //绘制两条直线
+            swModel.SketchManager.CreateLine(0, 0, 0, 1, 0, 0);
+            swModel.SketchManager.CreateLine(1.5, 0, 0, 1.5, 1, 0);
+            swModel.ClearSelection2(true);
+            //选择两条直线
+            swModel.Extension.SelectByID2("Line1", "SKETCHSEGMENT", 0, 0, 0, false, 0, null, 0);
+            //注意参数true，表示同时添加选择
+            swModel.Extension.SelectByID2("Line2", "SKETCHSEGMENT", 0, 0, 0, true, 0, null, 0);
+            //裁减/延长
+            swModel.SketchManager.SketchTrim((int)swSketchTrimChoice_e.swSketchTrimCorner, 0,0,0);
+            swModel.InsertSketch2(true);
+            swModel.ViewZoomtofit2();
+        }
+
+        /// <summary>
+        /// P7在草图中绘制两条直线，然后偏置
+        /// https://www.bilibili.com/video/BV1oX4y1N74h?p=7
+        /// </summary>
+        public void CADCoderP7(SldWorks swApp)
+        {
+            string defaultPartTemplate =
+                swApp.GetUserPreferenceStringValue((int)swUserPreferenceStringValue_e.swDefaultTemplatePart);
+            ModelDoc2 swModel = swApp.NewDocument(defaultPartTemplate, 0, 0, 0);
+            if (swModel == null) return;
+            swModel.Extension.SelectByID2("Front Plane", "PLANE", 0, 0, 0, false, 0, null, 0);
+            swModel.InsertSketch2(true);
+            //绘制两条直线
+            swModel.SketchManager.CreateLine(-0.5, 0.75, 0, -0.25, -0.5, 0);
+            swModel.SketchManager.CreateLine(-0.75, -1.25, 0, 0.5, -1.25, 0);
+            swModel.ClearSelection2(true);
+            //选择两条直线
+            swModel.Extension.SelectByID2("Line1", "SKETCHSEGMENT", 0, 0, 0, false, 0, null, 0);
+            //注意参数true，表示同时添加选择
+            swModel.Extension.SelectByID2("Line2", "SKETCHSEGMENT", 0, 0, 0, true, 0, null, 0);
+            //偏置
+            swModel.SketchManager.SketchOffset2(0.5,false,false,(int)swSkOffsetCapEndType_e.swSkOffsetNoCaps,(int)swSkOffsetMakeConstructionType_e.swSkOffsetDontMakeConstruction,true);
+            swModel.InsertSketch2(true);
+            swModel.ViewZoomtofit2();
+        }
+
+        /// <summary>
+        /// P8在草图中绘制中心线和圆，然后镜像圆
+        /// https://www.bilibili.com/video/BV1oX4y1N74h?p=8
+        /// </summary>
+        public void CADCoderP8(SldWorks swApp)
+        {
+            string defaultPartTemplate =
+                swApp.GetUserPreferenceStringValue((int)swUserPreferenceStringValue_e.swDefaultTemplatePart);
+            ModelDoc2 swModel = swApp.NewDocument(defaultPartTemplate, 0, 0, 0);
+            if (swModel == null) return;
+            swModel.Extension.SelectByID2("Front Plane", "PLANE", 0, 0, 0, false, 0, null, 0);
+            swModel.InsertSketch2(true);
+            //绘制垂直的中心线和圆
+            swModel.SketchManager.CreateCenterLine(0,0,0,0,1,0);
+            swModel.SketchManager.CreateCircleByRadius(-0.75, 0, 0, 0.2);
+            swModel.ClearSelection2(true);
+            //选择中心线和圆
+            swModel.Extension.SelectByID2("Line1", "SKETCHSEGMENT", 0, 0, 0, false, 0, null, 0);
+            //注意参数true，表示同时添加选择
+            swModel.Extension.SelectByID2("Arc1", "SKETCHSEGMENT", 0, 0, 0, true, 0, null, 0);
+            //镜像
+            swModel.SketchMirror();
+            swModel.InsertSketch2(true);
+            swModel.ViewZoomtofit2();
+        }
+
+        /// <summary>
+        /// P9在草图中绘制圆，然后线性阵列
+        /// P10编辑线性阵列
+        /// https://www.bilibili.com/video/BV1oX4y1N74h?p=9
+        /// https://www.bilibili.com/video/BV1oX4y1N74h?p=10
+        /// </summary>
+        public void CADCoderP9P10(SldWorks swApp)
+        {
+            string defaultPartTemplate =
+                swApp.GetUserPreferenceStringValue((int)swUserPreferenceStringValue_e.swDefaultTemplatePart);
+            ModelDoc2 swModel = swApp.NewDocument(defaultPartTemplate, 0, 0, 0);
+            if (swModel == null) return;
+            swModel.Extension.SelectByID2("Front Plane", "PLANE", 0, 0, 0, false, 0, null, 0);
+            swModel.InsertSketch2(true);
+            //绘制圆
+            swModel.SketchManager.CreateCircleByRadius(0, 0, 0, 0.2);
+            swModel.ClearSelection2(true);
+            //选择圆
+            swModel.Extension.SelectByID2("Arc1", "SKETCHSEGMENT", 0, 0, 0, false, 0, null, 0);
+            //线性阵列
+            swModel.SketchManager.CreateLinearSketchStepAndRepeat(3,1,1,0,0,0,"",true,false,true,true, true);
+            //P10，请单步运行观察
+            //编辑线性阵列X
+            swModel.SketchManager.EditLinearSketchStepAndRepeat(5, 1, 1, 0, 0, 0, "", true, false, true, true, false,"Arc1_");
+            //编辑线性阵列Y
+            swModel.SketchManager.EditLinearSketchStepAndRepeat(5, 4, 1, 0.75, 0, 0, "", true, false, true, true, false, "Arc1_");
+            //编辑线性阵列角度
+            swModel.SketchManager.EditLinearSketchStepAndRepeat(5, 4, 1, 0.75, 0.785,1.5708, "", true, false, true, true, false, "Arc1_");
+            //删除阵列数量（跳过）
+            swModel.SketchManager.EditLinearSketchStepAndRepeat(5, 4, 1, 0.75, 0.785, 1.5708, "(3,2)(2,1)", true, false, true, true, false, "Arc1_");
+            //显示阵列距离(Y方向)
+            swModel.SketchManager.EditLinearSketchStepAndRepeat(5, 4, 1, 0.75, 0.785, 1.5708, "(3,2)(2,1)", true, true, true, true, false, "Arc1_");
+            //显示与坐标轴的角度
+            swModel.SketchManager.EditLinearSketchStepAndRepeat(5, 4, 1, 0.75, 0.785, 1.5708, "(3,2)(2,1)", true, true, false, true, false, "Arc1_");
+            //显示整列的数量（X方向和Y方向）
+            swModel.SketchManager.EditLinearSketchStepAndRepeat(5, 4, 1, 0.75, 0.785, 1.5708, "(3,2)(2,1)", true, true, false, true, true, "Arc1_");
+
+            swModel.InsertSketch2(true);
+            swModel.ViewZoomtofit2();
+        }
+
+        /// <summary>
+        /// P11在草图中绘制圆，然后圆周阵列
+        /// https://www.bilibili.com/video/BV1oX4y1N74h?p=11
+        /// </summary>
+        public void CADCoderP11(SldWorks swApp)
+        {
+            string defaultPartTemplate =
+                swApp.GetUserPreferenceStringValue((int)swUserPreferenceStringValue_e.swDefaultTemplatePart);
+            ModelDoc2 swModel = swApp.NewDocument(defaultPartTemplate, 0, 0, 0);
+            if (swModel == null) return;
+            swModel.Extension.SelectByID2("Front Plane", "PLANE", 0, 0, 0, false, 0, null, 0);
+            swModel.InsertSketch2(true);
+            //绘制圆
+            swModel.SketchManager.CreateCircleByRadius(0, 0, 0, 0.2);
+            swModel.ClearSelection2(true);
+            //选择圆
+            swModel.Extension.SelectByID2("Arc1", "SKETCHSEGMENT", 0, 0, 0, false, 0, null, 0);
+            //线性阵列
+            swModel.SketchManager.CreateCircularSketchStepAndRepeat(0.5, 0, 3, 1, true, "", true, true, true);
+
+            swModel.InsertSketch2(true);
+            swModel.ViewZoomtofit2();
         }
     }
 }

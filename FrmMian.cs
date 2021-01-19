@@ -33,11 +33,15 @@ namespace SolidWorksSecDev
             //异步方式
             swApp = await SolidWorksSingleton.GetApplicationAsync();
             if (swApp == null) return;
+            swApp.CommandInProgress = true; //告诉SolidWorks，现在是用外部程序调用命令
             //if (swApp != null) swApp.SendMsgToUser("Solidworks version: "+ swApp.RevisionNumber());
 
             //学习代码测试
             StudyCode study = new StudyCode();
-            study.SolidWorksAcademyP6(swApp);
+            study.CADCoderP11(swApp);//调用需要测试的代码方法
+
+            swApp.CommandInProgress = false; //及时关闭外部命令调用，否则影响SolidWorks的使用
+            MessageBox.Show("测试代码运行完毕！");
         }
 
         /// <summary>
