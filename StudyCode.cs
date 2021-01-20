@@ -741,7 +741,7 @@ namespace SolidWorksSecDev
             //选择点
             swModel.Extension.SelectByID2("Point1", "SKETCHPOINT", 0, 0, 0, false, 0, null, 0);
             //绘制倒斜角
-            swModel.SketchManager.CreateChamfer((int)swSketchChamferType_e.swSketchChamfer_DistanceDistance,0.1, 0.2);
+            swModel.SketchManager.CreateChamfer((int)swSketchChamferType_e.swSketchChamfer_DistanceDistance, 0.1, 0.2);
             swModel.InsertSketch2(true);
             //视图
             swModel.ShowNamedView2("", (int)swStandardViews_e.swFrontView);
@@ -769,7 +769,7 @@ namespace SolidWorksSecDev
             //注意参数true，表示同时添加选择
             swModel.Extension.SelectByID2("Line2", "SKETCHSEGMENT", 0, 0, 0, true, 0, null, 0);
             //裁减/延长
-            swModel.SketchManager.SketchTrim((int)swSketchTrimChoice_e.swSketchTrimCorner, 0,0,0);
+            swModel.SketchManager.SketchTrim((int)swSketchTrimChoice_e.swSketchTrimCorner, 0, 0, 0);
             swModel.InsertSketch2(true);
             swModel.ViewZoomtofit2();
         }
@@ -795,7 +795,7 @@ namespace SolidWorksSecDev
             //注意参数true，表示同时添加选择
             swModel.Extension.SelectByID2("Line2", "SKETCHSEGMENT", 0, 0, 0, true, 0, null, 0);
             //偏置
-            swModel.SketchManager.SketchOffset2(0.5,false,false,(int)swSkOffsetCapEndType_e.swSkOffsetNoCaps,(int)swSkOffsetMakeConstructionType_e.swSkOffsetDontMakeConstruction,true);
+            swModel.SketchManager.SketchOffset2(0.5, false, false, (int)swSkOffsetCapEndType_e.swSkOffsetNoCaps, (int)swSkOffsetMakeConstructionType_e.swSkOffsetDontMakeConstruction, true);
             swModel.InsertSketch2(true);
             swModel.ViewZoomtofit2();
         }
@@ -813,7 +813,7 @@ namespace SolidWorksSecDev
             swModel.Extension.SelectByID2("Front Plane", "PLANE", 0, 0, 0, false, 0, null, 0);
             swModel.InsertSketch2(true);
             //绘制垂直的中心线和圆
-            swModel.SketchManager.CreateCenterLine(0,0,0,0,1,0);
+            swModel.SketchManager.CreateCenterLine(0, 0, 0, 0, 1, 0);
             swModel.SketchManager.CreateCircleByRadius(-0.75, 0, 0, 0.2);
             swModel.ClearSelection2(true);
             //选择中心线和圆
@@ -846,14 +846,14 @@ namespace SolidWorksSecDev
             //选择圆
             swModel.Extension.SelectByID2("Arc1", "SKETCHSEGMENT", 0, 0, 0, false, 0, null, 0);
             //线性阵列
-            swModel.SketchManager.CreateLinearSketchStepAndRepeat(3,1,1,0,0,0,"",true,false,true,true, true);
+            swModel.SketchManager.CreateLinearSketchStepAndRepeat(3, 1, 1, 0, 0, 0, "", true, false, true, true, true);
             //P10，请单步运行观察
             //编辑线性阵列X
-            swModel.SketchManager.EditLinearSketchStepAndRepeat(5, 1, 1, 0, 0, 0, "", true, false, true, true, false,"Arc1_");
+            swModel.SketchManager.EditLinearSketchStepAndRepeat(5, 1, 1, 0, 0, 0, "", true, false, true, true, false, "Arc1_");
             //编辑线性阵列Y
             swModel.SketchManager.EditLinearSketchStepAndRepeat(5, 4, 1, 0.75, 0, 0, "", true, false, true, true, false, "Arc1_");
             //编辑线性阵列角度
-            swModel.SketchManager.EditLinearSketchStepAndRepeat(5, 4, 1, 0.75, 0.785,1.5708, "", true, false, true, true, false, "Arc1_");
+            swModel.SketchManager.EditLinearSketchStepAndRepeat(5, 4, 1, 0.75, 0.785, 1.5708, "", true, false, true, true, false, "Arc1_");
             //删除阵列数量（跳过）
             swModel.SketchManager.EditLinearSketchStepAndRepeat(5, 4, 1, 0.75, 0.785, 1.5708, "(3,2)(2,1)", true, false, true, true, false, "Arc1_");
             //显示阵列距离(Y方向)
@@ -884,11 +884,84 @@ namespace SolidWorksSecDev
             swModel.ClearSelection2(true);
             //选择圆
             swModel.Extension.SelectByID2("Arc1", "SKETCHSEGMENT", 0, 0, 0, false, 0, null, 0);
-            //线性阵列
+            //圆周阵列
             swModel.SketchManager.CreateCircularSketchStepAndRepeat(0.5, 0, 3, 1, true, "", true, true, true);
 
             swModel.InsertSketch2(true);
             swModel.ViewZoomtofit2();
         }
+
+        /// <summary>
+        /// P12打开零件
+        /// https://www.bilibili.com/video/BV1oX4y1N74h?p=12
+        /// </summary>
+        public void CADCoderP12(SldWorks swApp)
+        {
+            //open a saved document
+            //ModelDoc2 swModel = swApp.OpenDoc(@"E:\Videos\SolidWorks Secondary Development\SWModel\Part1.SLDPRT", (int)swDocumentTypes_e.swDocPART);
+            ModelDoc2 swModel = swApp.OpenDoc6(@"E:\Videos\SolidWorks Secondary Development\SWModel\Part1.SLDPRT", (int)swDocumentTypes_e.swDocPART, (int)swOpenDocOptions_e.swOpenDocOptions_Silent, "", 0, 0);
+            if (swModel == null) return;
+            swModel.Extension.SelectByID2("Front Plane", "PLANE", 0, 0, 0, false, 0, null, 0);
+        }
+
+        /// <summary>
+        /// P13在草图中绘制直线
+        /// P14在草图中绘制中心线
+        /// P15在草图中绘制对角矩形
+        /// P15在草图中绘制中心矩形
+        /// https://www.bilibili.com/video/BV1oX4y1N74h?p=13
+        /// https://www.bilibili.com/video/BV1oX4y1N74h?p=14
+        /// https://www.bilibili.com/video/BV1oX4y1N74h?p=15
+        /// https://www.bilibili.com/video/BV1oX4y1N74h?p=16
+        /// </summary>
+        public void CADCoderP13141516(SldWorks swApp)
+        {
+            string defaultPartTemplate =
+                swApp.GetUserPreferenceStringValue((int)swUserPreferenceStringValue_e.swDefaultTemplatePart);
+            ModelDoc2 swModel = swApp.NewDocument(defaultPartTemplate, 0, 0, 0);
+            if (swModel == null) return;
+            swModel.Extension.SelectByID2("Front Plane", "PLANE", 0, 0, 0, false, 0, null, 0);
+            swModel.InsertSketch2(true);
+            //绘制直线
+            swModel.SketchManager.CreateLine(0, 0, 0, 2, 0, 0);
+            //绘制中心线
+            swModel.SketchManager.CreateLine(0, 0, 0, 0, 2, 0);
+            //绘制对角矩形
+            swModel.SketchManager.CreateCornerRectangle(0, 1, 0, 1, 0, 0);
+            //绘制中心矩形
+            swModel.SketchManager.CreateCenterRectangle(0, 0, 0, 1, 1, 0);
+            swModel.ClearSelection2(true);
+            swModel.InsertSketch2(true);
+            swModel.ViewZoomtofit2();
+        }
+
+        /// <summary>
+        /// P17在草图中绘制两条直线，然后延长一根直线与另一根相交
+        /// https://www.bilibili.com/video/BV1oX4y1N74h?p=17
+        /// </summary>
+        public void CADCoderP17(SldWorks swApp)
+        {
+            string defaultPartTemplate =
+                swApp.GetUserPreferenceStringValue((int)swUserPreferenceStringValue_e.swDefaultTemplatePart);
+            ModelDoc2 swModel = swApp.NewDocument(defaultPartTemplate, 0, 0, 0);
+            if (swModel == null) return;
+            swModel.Extension.SelectByID2("Front Plane", "PLANE", 0, 0, 0, false, 0, null, 0);
+            swModel.InsertSketch2(true);
+            //绘制两条直线
+            swModel.SketchManager.CreateLine(-0.5, 0.75, 0, -0.25, -0.5, 0);
+            swModel.SketchManager.CreateLine(-0.75, -1.25, 0, 0.5, -1.25, 0);
+            swModel.ClearSelection2(true);
+            //选择两条直线
+            swModel.Extension.SelectByID2("Line1", "SKETCHSEGMENT", 0, 0, 0, false, 0, null, 0);
+            //注意参数true，表示同时添加选择
+            swModel.Extension.SelectByID2("Line2", "SKETCHSEGMENT", 0, 0, 0, true, 0, null, 0);
+            //延长线段
+            swModel.SketchManager.SketchExtend(0, 0, 0);
+            swModel.InsertSketch2(true);
+            swModel.ViewZoomtofit2();
+        }
     }
+
+
+
 }

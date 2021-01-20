@@ -55,6 +55,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BasicCode.cs" />
+    <Compile Include="CustomPropertyObject.cs" />
     <Compile Include="ExportDxf.cs" />
     <Compile Include="FrmMian.cs">
       <SubType>Form</SubType>
@@ -62,6 +63,7 @@
     <Compile Include="FrmMian.Designer.cs">
       <DependentUpon>FrmMian.cs</DependentUpon>
     </Compile>
+    <Compile Include="Helper.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SolidWorksSingleton.cs" />
