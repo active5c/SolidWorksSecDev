@@ -216,6 +216,116 @@ namespace SolidWorksSecDev
             swApp.SendMsgToUser("Done!");
         }
 
+        #region CADSharp2
+
+        /// <summary>
+        /// https://www.bilibili.com/video/BV1Mp4y1Y7Bd?p=14
+        /// Opening, Saving, and Exporting Documents
+        /// </summary>
+        /// <param name="swApp"></param>
+        public void CADSharp2P14(SldWorks swApp)
+        {
+            //string defaultPartTemplate = swApp.GetUserPreferenceStringValue((int)swUserPreferenceStringValue_e.swDefaultTemplatePart);
+            //ModelDoc2 swModel1 = swApp.NewDocument(defaultPartTemplate, 0, 0, 0);
+            ModelDoc2 swModel2 = swApp.OpenDoc6(@"E:\Videos\SolidWorks Secondary Development\SWModel\Part1.SLDPRT", (int)swDocumentTypes_e.swDocPART, (int)swOpenDocOptions_e.swOpenDocOptions_Silent, "", 0, 0);
+            DocumentSpecification swDocSpec=swApp.GetOpenDocSpec(@"E:\Videos\SolidWorks Secondary Development\SWModel\Assem4.SLDASM");
+            swDocSpec.DisplayState = "Transparent";
+            swDocSpec.UseLightWeightDefault = false;
+            swDocSpec.LightWeight = true;
+            ModelDoc2 swModel3 = swApp.OpenDoc7(swDocSpec);
+
+            ModelDoc2 swModel = swApp.ActivateDoc2("Part1.SLDPRT", true, 0);
+            //另存为EDrawing版本
+            string newPath = swModel.GetPathName().Replace("SLDPRT", "eprt");
+            swModel.Extension.SaveAs(newPath, 0, 1 + 2, null, 0, 0);
+            swApp.CloseDoc(swModel.GetPathName());
+        }
+
+        /// <summary>
+        /// https://www.bilibili.com/video/BV1Mp4y1Y7Bd?p=15
+        /// Working With Configurations
+        /// </summary>
+        /// <param name="swApp"></param>
+        public void CADSharp2P15(SldWorks swApp)
+        {
+            ModelDoc2 swModel = swApp.ActiveDoc;
+            //Test for the number of configuration
+            if (swModel.GetConfigurationCount() == 1)
+            {
+                Debug.Print("Only one configuration");
+                //Add three configs
+                swModel.AddConfiguration3("A", "", "", 0);
+                swModel.AddConfiguration3("B", "", "", 0);
+                swModel.AddConfiguration3("C", "", "", 0);
+            }
+            else
+            {
+                Debug.Print("More than one configuration exists.");
+            }
+            //get the active configuration's name
+            ConfigurationManager swConfigMgr = swModel.ConfigurationManager;
+            Configuration swConfig = swConfigMgr.ActiveConfiguration;
+            string strConfig = swConfig.Name;
+            Debug.Print(strConfig);
+            //delete the first configuration
+            string[] vConfigNames = swModel.GetConfigurationNames();
+            swModel.DeleteConfiguration2(vConfigNames[0]);
+            //Cycle through configs and change names
+            vConfigNames = swModel.GetConfigurationNames();
+            for (int i = 0; i < vConfigNames.Length; i++)
+            {
+                //swModel.EditConfiguration3(vConfigNames[i], "Config" + (i + 1), "", "", 0);
+                swConfig = swModel.GetConfigurationByName(vConfigNames[i]);
+                swConfig.Name = "Config" + (i + 1);
+            }
+            //Activate the first configuration
+            vConfigNames = swModel.GetConfigurationNames();
+            swModel.ShowConfiguration2(vConfigNames[0]);
+        }
+
+        /// <summary>
+        /// https://www.bilibili.com/video/BV1Mp4y1Y7Bd?p=16
+        /// Working With Custom Properties
+        /// </summary>
+        /// <param name="swApp"></param>
+        public void CADSharp2P16(SldWorks swApp)
+        {
+            ModelDoc2 swModel = swApp.ActiveDoc;
+            //Access cust prop at doc level
+            CustomPropertyManager swCustPropMgr = swModel.Extension.CustomPropertyManager[""];
+            swCustPropMgr.Add2("Description", (int) swCustomInfoType_e.swCustomInfoText, "your desc");
+            swCustPropMgr.Set("Author", "your name");
+            string strValue;
+            string strResolved;
+            swCustPropMgr.Get3("PartNo", true,out strValue, out strResolved);
+            Debug.Print(strValue + "   " +strResolved);
+            swCustPropMgr.Delete("PartNo");
+
+            //Access cust prop at config level
+            string[] vConfigNames = swModel.GetConfigurationNames();
+            for (int i = 0; i < vConfigNames.Length; i++)
+            {
+                swCustPropMgr = swModel.Extension.CustomPropertyManager[vConfigNames[i]];
+                swCustPropMgr.Add2("PartNo", (int)swCustomInfoType_e.swCustomInfoText, strValue+"-"+ vConfigNames[i]);
+                swCustPropMgr.Add2("Material", (int)swCustomInfoType_e.swCustomInfoText, (char)34+"SW-Material@"+swModel.GetTitle()+ (char)34);
+            }
+        }
+
+        /// <summary>
+        /// https://www.bilibili.com/video/BV1Mp4y1Y7Bd?p=17
+        /// Selection
+        /// </summary>
+        /// <param name="swApp"></param>
+        public void CADSharp2P17(SldWorks swApp)
+        {
+
+        }
+
+
+
+
+        #endregion
+
         /// <summary>
         /// Cylinder Length and Diameter Program//新建零件绘制一个圆柱形
         /// https://www.bilibili.com/video/BV1M5411n7GH
