@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.IO;
+using System.Windows.Forms;
 using SolidWorks.Interop.sldworks;
 using SolidWorks.Interop.swconst;
+using View = SolidWorks.Interop.sldworks.View;
 
 namespace SolidWorksSecDev
 {
@@ -228,14 +231,14 @@ namespace SolidWorksSecDev
             //string defaultPartTemplate = swApp.GetUserPreferenceStringValue((int)swUserPreferenceStringValue_e.swDefaultTemplatePart);
             //ModelDoc2 swModel1 = swApp.NewDocument(defaultPartTemplate, 0, 0, 0);
             ModelDoc2 swModel2 = swApp.OpenDoc6(@"E:\Videos\SolidWorks Secondary Development\SWModel\Part1.SLDPRT", (int)swDocumentTypes_e.swDocPART, (int)swOpenDocOptions_e.swOpenDocOptions_Silent, "", 0, 0);
-            DocumentSpecification swDocSpec=swApp.GetOpenDocSpec(@"E:\Videos\SolidWorks Secondary Development\SWModel\Assem4.SLDASM");
+            DocumentSpecification swDocSpec = swApp.GetOpenDocSpec(@"E:\Videos\SolidWorks Secondary Development\SWModel\Assem4.SLDASM");
             swDocSpec.DisplayState = "Transparent";
             swDocSpec.UseLightWeightDefault = false;
             swDocSpec.LightWeight = true;
             ModelDoc2 swModel3 = swApp.OpenDoc7(swDocSpec);
 
             ModelDoc2 swModel = swApp.ActivateDoc2("Part1.SLDPRT", true, 0);
-            //另存为EDrawing版本
+            //另存为eDrawing版本
             string newPath = swModel.GetPathName().Replace("SLDPRT", "eprt");
             swModel.Extension.SaveAs(newPath, 0, 1 + 2, null, 0, 0);
             swApp.CloseDoc(swModel.GetPathName());
@@ -293,12 +296,12 @@ namespace SolidWorksSecDev
             ModelDoc2 swModel = swApp.ActiveDoc;
             //Access cust prop at doc level
             CustomPropertyManager swCustPropMgr = swModel.Extension.CustomPropertyManager[""];
-            swCustPropMgr.Add2("Description", (int) swCustomInfoType_e.swCustomInfoText, "your desc");
+            swCustPropMgr.Add2("Description", (int)swCustomInfoType_e.swCustomInfoText, "your desc");
             swCustPropMgr.Set("Author", "your name");
             string strValue;
             string strResolved;
-            swCustPropMgr.Get3("PartNo", true,out strValue, out strResolved);
-            Debug.Print(strValue + "   " +strResolved);
+            swCustPropMgr.Get3("PartNo", true, out strValue, out strResolved);
+            Debug.Print(strValue + "   " + strResolved);
             swCustPropMgr.Delete("PartNo");
 
             //Access cust prop at config level
@@ -306,8 +309,8 @@ namespace SolidWorksSecDev
             for (int i = 0; i < vConfigNames.Length; i++)
             {
                 swCustPropMgr = swModel.Extension.CustomPropertyManager[vConfigNames[i]];
-                swCustPropMgr.Add2("PartNo", (int)swCustomInfoType_e.swCustomInfoText, strValue+"-"+ vConfigNames[i]);
-                swCustPropMgr.Add2("Material", (int)swCustomInfoType_e.swCustomInfoText, (char)34+"SW-Material@"+swModel.GetTitle()+ (char)34);
+                swCustPropMgr.Add2("PartNo", (int)swCustomInfoType_e.swCustomInfoText, strValue + "-" + vConfigNames[i]);
+                swCustPropMgr.Add2("Material", (int)swCustomInfoType_e.swCustomInfoText, (char)34 + "SW-Material@" + swModel.GetTitle() + (char)34);
             }
         }
 
@@ -318,11 +321,268 @@ namespace SolidWorksSecDev
         /// <param name="swApp"></param>
         public void CADSharp2P17(SldWorks swApp)
         {
+            ModelDoc2 swModel = swApp.ActiveDoc;
+            SelectionMgr swSelMgr = swModel.SelectionManager;
+            Debug.Print(swSelMgr.GetSelectedObjectType3(-1, 1).ToString());
+            for (int i = 0; i < swSelMgr.GetSelectedObjectCount2(-1); i++)
+            {
+                if (swSelMgr.GetSelectedObjectType3(i, -1) == (int)swSelectType_e.swSelBODYFEATURES)
+                {
+                    Feature swFeat = swSelMgr.GetSelectedObject6(i, -1);
+                    MessageBox.Show(swFeat.Name);
+                }
+                else
+                {
+                    MessageBox.Show("Please select a feature from the feature manager tree.");
+                }
+            }
+
+            if (swSelMgr.GetSelectedObjectType3(1, -1) == (int)swSelectType_e.swSelEDGES)
+            {
+                Edge swEdge = swSelMgr.GetSelectedObject6(1, -1);
+                swModel.ClearSelection2(true);//清除选择
+                //选择两个相接面
+                Face2[] vFace = swEdge.GetTwoAdjacentFaces2();
+                for (int i = 0; i < vFace.Length; i++)
+                {
+                    Face2 swFace = vFace[i];
+                    Entity swEnt = (Entity)swFace;
+                    SelectData swSelData = default(SelectData);
+                    swEnt.Select4(true, swSelData);
+                    Debug.Print(swSelData.X + "," + swSelData.Y + "," + swSelData.Z); ;
+                }
+            }
+            else
+            {
+                MessageBox.Show("Please select an edge.");
+            }
+
+            //SelectByID2
+            //根据空间坐标点选择面，线
+            swModel.Extension.SelectByID2("", "FACE", -0.04, -0.140, 0, false, 0, null, 0);
+            swModel.Extension.SelectByID2("", "EDGE", -0.05, -0.140, 0, true, 0, null, 0);
+            //根据特征树名称选择草图点，面，特征
+            swModel.Extension.SelectByID2("Point1@Origin", "EXTSKETCHPOINT", -50, -150, 0, true, 0, null, 0);
+            swModel.Extension.SelectByID2("Front Plane", "PLANE", -50, -150, 0, true, 0, null, 0);
+            swModel.Extension.SelectByID2("Cut-Extrudel", "BODYFEATURE", -50, -150, 0, true, 0, null, 0);
 
         }
 
+        /// <summary>
+        /// https://www.bilibili.com/video/BV1Mp4y1Y7Bd?p=18
+        /// System and Document Options
+        /// </summary>
+        /// <param name="swApp"></param>
+        public void CADSharp2P18(SldWorks swApp)
+        {
+            //Input Dimension Value,false取消勾选，true勾选
+            if (swApp.GetUserPreferenceToggle((int)swUserPreferenceToggle_e.swInputDimValOnCreate))
+            {
+                swApp.SetUserPreferenceToggle((int)swUserPreferenceToggle_e.swInputDimValOnCreate, false);
+            }
+            else
+            {
+                swApp.SetUserPreferenceToggle((int)swUserPreferenceToggle_e.swInputDimValOnCreate, true);
+            }
+            Debug.Print(swApp.GetUserPreferenceToggle((int)swUserPreferenceToggle_e.swInputDimValOnCreate).ToString());
+            //API搜索：System Options and Document Properties
+            //数值类型的设置
+            if (swApp.GetUserPreferenceDoubleValue((int)swUserPreferenceDoubleValue_e.swViewTransitionHideShowComponent) == 0)
+            {
+                swApp.SetUserPreferenceDoubleValue((int)swUserPreferenceDoubleValue_e.swViewTransitionHideShowComponent, 0.5);
+            }
+            else
+            {
+                swApp.SetUserPreferenceDoubleValue((int)swUserPreferenceDoubleValue_e.swViewTransitionHideShowComponent, 0.5);
+            }
+            Debug.Print(swApp.GetUserPreferenceDoubleValue((int)swUserPreferenceDoubleValue_e.swViewTransitionHideShowComponent).ToString());
+            //Document Properties
+            //标注保持两位小数点
+            ModelDoc2 swModel = swApp.ActiveDoc;
+            swModel.Extension.SetUserPreferenceInteger(
+                (int)swUserPreferenceIntegerValue_e.swDetailingLinearDimPrecision,
+                (int)swUserPreferenceOption_e.swDetailingDimension, 2);
+        }
 
+        /// <summary>
+        /// https://www.bilibili.com/video/BV1Mp4y1Y7Bd?p=19
+        /// Working With Sketches
+        /// </summary>
+        /// <param name="swApp"></param>
+        public void CADSharp2P19(SldWorks swApp)
+        {
+            string defaultPartTemplate = swApp.GetUserPreferenceStringValue((int)swUserPreferenceStringValue_e.swDefaultTemplatePart);
+            ModelDoc2 swModel = swApp.NewDocument(defaultPartTemplate, 0, 0, 0);
 
+            //ModelDoc2 swModel = swApp.ActiveDoc;
+            SketchManager swSkethMgr = swModel.SketchManager;
+            //select front plane and insert sketch
+            swModel.Extension.SelectByID2("Front Plane", "PLANE", 0, 0, 0, false, 0, null, 0);
+            swSkethMgr.InsertSketch(true);
+            //turn on direct addition to database
+            swSkethMgr.AddToDB = true;
+            //create sketch entities
+            SketchSegment swSketchSeg = swSkethMgr.CreateLine(0, 0, 0, 0, 0.05, 0);
+            //添加约束
+            swModel.SketchAddConstraints("sgVERTICAL2D");
+            //将添加尺寸时出现的弹窗关闭（取消勾选）
+            if (swApp.GetUserPreferenceToggle((int)swUserPreferenceToggle_e.swInputDimValOnCreate)) swApp.SetUserPreferenceToggle((int)swUserPreferenceToggle_e.swInputDimValOnCreate, false);
+            //添加尺寸
+            swModel.AddVerticalDimension2(-0.01, 0.025, 0);
+
+            //make first sketch pt coincident with origin
+            //first select both pts then add ralation
+            //添加直线起点与原点重合配合
+            swModel.Extension.SelectByID2("", "EXTSKETCHPOINT", 0, 0, 0, false, 0, null, 0);
+            swModel.Extension.SelectByID2("", "SKETCHPOINT", 0, 0, 0, true, 0, null, 0);
+            swModel.SketchAddConstraints("sgCOINCIDENT");
+
+            swSkethMgr.CreateTangentArc(0, 0.05, 0, 0.05, 0.05, 0, (int)swTangentArcTypes_e.swForward);
+            //smart dimension
+            swModel.AddDimension2(0.025, 0.08, 0);
+
+            swSkethMgr.CreateLine(0.05, 0.05, 0, 0, 0, 0);
+            swModel.AddHorizontalDimension2(0.05, 0.025, 0);
+
+            swSkethMgr.CreateCircleByRadius(0.025, 0.05, 0, 0.005);
+            swModel.AddDimension2(0.025, 0.065, 0);
+
+            //fully define sketch，草图完全定义
+            //swModel.Extension.SelectByID2("", "EXSKETCHPOINT", 0, 0, 0, false, 6, null, 0);
+            //swSkethMgr.FullyDefineSketch(true, true, 1023, true, 1, null, 1, null, 0, 0);
+
+            //将添加尺寸时出现的弹窗打开（勾选）
+            swApp.SetUserPreferenceToggle((int)swUserPreferenceToggle_e.swInputDimValOnCreate, true);
+            //turn off direct addition to database
+            swSkethMgr.AddToDB = false;
+            swSkethMgr.InsertSketch(true);
+            //swModel.ClearSelection2(true);
+            //修改已经存在的草图
+            //make sure one sketch is selected
+            //swModel.Extension.SelectByID2("", "SKETCH", 0.05, 0.05, 0, false, 0, null, 0);
+            SelectionMgr swSelMgr = swModel.SelectionManager;
+            if (swSelMgr.GetSelectedObjectType3(1, -1) != (int)swSelectType_e.swSelSKETCHES || swSelMgr.GetSelectedObjectCount2(-1) > 1)
+            {
+                swModel.Extension.ShowSmartMessage("Please select a single sketch from the FeatureManager tree", 3000, false, true);
+            }
+            //open the selected sketch
+            swSkethMgr.InsertSketch(false);
+            //get the sketch
+            Sketch swSketch = swSkethMgr.ActiveSketch;
+            //get the sketch segments
+            int intSketchEntCount = 0;
+            SketchSegment[] vSketchSegments = swSketch.GetSketchSegments();
+            for (int i = 0; i < vSketchSegments.Length; i++)
+            {
+                swSketchSeg = vSketchSegments[i];
+                //for some reason this won't recognize true...
+                if (!swSketchSeg.ConstructionGeometry) intSketchEntCount++;
+            }
+            //close the sketch
+            swSkethMgr.InsertSketch(true);
+            //display the result
+            swModel.Extension.ShowSmartMessage("Sketch entities:"+intSketchEntCount,3000,false,true);
+        }
+
+        /// <summary>
+        /// https://www.bilibili.com/video/BV1Mp4y1Y7Bd?p=20
+        /// Working with Features Part A
+        /// </summary>
+        /// <param name="swApp"></param>
+        public void CADSharp2P20(SldWorks swApp)
+        {
+            string defaultPartTemplate = swApp.GetUserPreferenceStringValue((int)swUserPreferenceStringValue_e.swDefaultTemplatePart);
+            ModelDoc2 swModel = swApp.NewDocument(defaultPartTemplate, 0, 0, 0);
+            SketchManager swSketchMgr = swModel.SketchManager;
+            //create plate sketch profile
+            swModel.Extension.SelectByID2("Front Plane", "PLANE", 0, 0, 0, false, 0, null, 0);
+            swSketchMgr.InsertSketch(true);
+            swSketchMgr.CreateCircleByRadius(0, 0, 0, 0.05);
+            swModel.Extension.SelectByID2("", "EXTSKETCHPOINT", 0, 0, 0, false, 6, null, 0);
+            swSketchMgr.FullyDefineSketch(true, true, 1023, true, 1, null, 1, null, 0, 0);
+            FeatureManager swFeatureMgr = swModel.FeatureManager;
+            //create mid-plane base extrusion
+            Feature swFeat = swFeatureMgr.FeatureExtrusion2(true,false,false,6,0,0.01,0,false,false,false,false,0,0,false,false,false,false,true,true,true,0,0,false);
+            //create extrude cut profile
+            swModel.Extension.SelectByID2("Front Plane", "PLANE", 0, 0, 0, false, 0, null, 0);
+            swSketchMgr.InsertSketch(true);
+            swSketchMgr.CreateCircleByRadius(-0.04, 0, 0, 0.004);
+            swModel.Extension.SelectByID2("", "EXTSKETCHPOINT", 0, 0, 0, false, 6, null, 0);
+            swSketchMgr.FullyDefineSketch(true, true, 1023, true, 1, null, 1, null, 0, 0);
+            //create tow-side cut extrude
+            swFeat = swFeatureMgr.FeatureCut3(false,false,false,1,1,0,0,false,false,false,false,0,0,false,false,false,false,false,true,true,true,true,false,0,0,false);
+            //create axis 
+            swModel.Extension.SelectByID2("Top Plane", "PLANE", 0, 0, 0, false, 0, null, 0);
+            swModel.Extension.SelectByID2("Right Plane", "PLANE", 0, 0, 0, true, 0, null, 0);
+            swModel.InsertAxis2(true);
+            //create circular pattern of extruded cut
+            swModel.Extension.SelectByID2("Axis1", "AXIS", 0, 0, 0, false, 1, null, 0);
+            swModel.Extension.SelectByID2("Cut-Extrude1", "BODYFEATURE", 0, 0, 0, true, 4, null, 0);
+            swFeatureMgr.FeatureCircularPattern2(10, 2 * 4 * Math.Atan(1) / 10, false, "", false);
+            //create fillet
+            PartDoc swPart = (PartDoc)swModel;
+            var vBodies = swPart.GetBodies2((int)swBodyType_e.swSolidBody, false);
+            //assumes only one solid body in part
+            Body2 swBody = (Body2) vBodies[0];
+            var vFace = swBody.GetFaces();
+            Face2 swFinalFace = default(Face2);
+            double dblArea = 0;
+            for (int i = 0; i < vFace.Length; i++)
+            {
+                Face2 swFace =(Face2) vFace[i];
+                Surface swSurf = swFace.GetSurface();
+                if (swSurf.IsCylinder())
+                {
+                    //拿到面积最大的圆柱面
+                    if (swFace.GetArea()>dblArea)
+                    {
+                        dblArea = swFace.GetArea();
+                        swFinalFace = swFace;
+                    }
+                }
+            }
+            Entity swEnt = (Entity)swFinalFace;
+            swEnt.Select4(false, null);
+            swFeatureMgr.FeatureFillet(2, 0.001, 0, 0, 0, 0, 0);
+
+            //change the material
+            swPart.SetMaterialPropertyName2("","","Plain Carbon Steel");
+        }
+
+        /// <summary>
+        /// https://www.bilibili.com/video/BV1Mp4y1Y7Bd?p=21
+        /// Working with Features Part B
+        /// </summary>
+        /// <param name="swApp"></param>
+        public void CADSharp2P21(SldWorks swApp)
+        {
+            ModelDoc2 swModel = swApp.ActiveDoc;
+            PartDoc swPart = (PartDoc) swModel;
+            //修改拉伸深度
+            Feature swFeat = swPart.FeatureByName("Boss-Extrude1");
+            ExtrudeFeatureData2 swExtrudeFeatData = swFeat.GetDefinition();
+            swExtrudeFeatData.SetDepth(true,swExtrudeFeatData.GetDepth(true)*1.5);
+            swFeat.ModifyDefinition(swExtrudeFeatData, swModel, null);
+            //modify fillet 修改圆角特征,将圆角特征应用到所有的边线
+            swFeat = swPart.FeatureByName("Fillet1");
+            SimpleFilletFeatureData2 swFilletFeatData = swFeat.GetDefinition();
+            swFilletFeatData.AccessSelections(swModel, null);
+            var vBodies = swPart.GetBodies2((int) swBodyType_e.swSolidBody, false);
+            //assumes only one solid body in part
+            Body2 swBody = (Body2) vBodies[0];
+            swFilletFeatData.Edges = swBody.GetEdges();
+            swFeat.ModifyDefinition(swFilletFeatData, swModel, null);
+        }
+
+        /// <summary>
+        /// https://www.bilibili.com/video/BV1Mp4y1Y7Bd?p=22
+        /// Working with Features Part C
+        /// </summary>
+        /// <param name="swApp"></param>
+        public void CADSharp2P22(SldWorks swApp)
+        {
+
+        }
 
         #endregion
 

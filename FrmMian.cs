@@ -38,7 +38,7 @@ namespace SolidWorksSecDev
 
             //学习代码测试
             StudyCode study = new StudyCode();
-            study.CADSharp2P16(swApp);//调用需要测试的代码方法
+            study.CADSharp2P21(swApp);//调用需要测试的代码方法
 
             swApp.CommandInProgress = false; //及时关闭外部命令调用，否则影响SolidWorks的使用
             MessageBox.Show("测试代码运行完毕！");
