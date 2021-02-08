@@ -817,13 +817,12 @@ namespace SolidWorksSecDev
             Debug.Print("---TotalLength:" + dblTotalLength * 1000d + "mm");
         }
 
-
         /// <summary>
         /// https://www.bilibili.com/video/BV1Mp4y1Y7Bd?p=24
         /// Creating A New Assembly
         /// </summary>
         /// <param name="swApp"></param>
-        public void CADSharp2P24(SldWorks swApp)
+        public void CADSharp2P24_1(SldWorks swApp)
         {
             ModelDoc2 swModel = swApp.ActiveDoc;
             if (swModel == null || swModel.GetType() != (int)swDocumentTypes_e.swDocASSEMBLY) return;
@@ -834,72 +833,175 @@ namespace SolidWorksSecDev
                 MessageBox.Show("Please select a face.");
                 return;
             }
+            
             //get the drawer face 
             Face2 swFace = swSelMgr.GetSelectedObject6(1, -1);
             Entity swDrawerFace = (Entity)swFace;
             swDrawerFace = swDrawerFace.GetSafeEntity();
 
-            //get the full circle edge(s) from drawer face
-            var vEdges = swFace.GetEdges();
-            Entity swDrawerEdge = default(Entity);
-            for (int i = 0; i < vEdges.Length; i++)
+            Collection<Entity> collDrawerEdge = new Collection<Entity>();
+            Collection<Entity> collCompFace = new Collection<Entity>();
+            GetDrawerEdge();
+
+            for (int i = 0; i < collDrawerEdge.Count; i++)
             {
-                Edge swEdge = (Edge)vEdges[i];
-                Curve swCurve = swEdge.GetCurve();
-                if (swCurve.Identity() == (int)swCurveTypes_e.CIRCLE_TYPE) //3002,circle
+                Component2 swComp= AddComps();
+                GetCompFace(swComp);
+                AddMates(swComp, collCompFace[i],collDrawerEdge[i]);
+            }
+            swModel.ClearSelection2(true);
+            swModel.ForceRebuild3(false);
+
+            //-----------------------------------------------
+            //局部方法1 获取圆
+            void GetDrawerEdge()
+            {
+                //get the full circle edge(s) from drawer face
+                var vEdges = swFace.GetEdges();
+                Entity swDrawerEdge = default(Entity);
+                for (int i = 0; i < vEdges.Length; i++)
                 {
-                    Vertex swVertex = swEdge.GetStartVertex();
-                    if (swVertex == null)
+                    Edge swEdge = (Edge)vEdges[i];
+                    Curve swCurve = swEdge.GetCurve();
+                    if (swCurve.Identity() == (int)swCurveTypes_e.CIRCLE_TYPE) //3002,circle
                     {
-                        swDrawerEdge = (Entity)swEdge;
-                        swDrawerEdge = swDrawerEdge.GetSafeEntity();
+                        Vertex swVertex = swEdge.GetStartVertex();
+                        if (swVertex == null)
+                        {
+                            swDrawerEdge = (Entity)swEdge;
+                            swDrawerEdge = swDrawerEdge.GetSafeEntity();
+                            collDrawerEdge.Add(swDrawerEdge);
+                        }
+                    }
+                }
+                if (swDrawerEdge == null) return;
+            }
+
+
+            //局部方法2 插入子装配
+            Component2 AddComps()
+            {
+                //add the component
+                string strCompPath = @"E:\Videos\SolidWorks Secondary Development\SWModel\CADSharp2P20.SLDPRT";
+                swApp.DocumentVisible(false, (int)swDocumentTypes_e.swDocPART);
+                swApp.OpenDoc6(strCompPath, (int)swDocumentTypes_e.swDocPART, 0, "", 0, 0);
+                Component2 swComp = swAssy.AddComponent4(strCompPath, "", 0, 0, 0);//XYZ边界区域的中心bounding box centre  
+                swApp.DocumentVisible(true, (int)swDocumentTypes_e.swDocPART);
+                return swComp;
+            }
+
+            //局部方法3 获取圆柱面
+            void GetCompFace(Component2 swComp)
+            {
+                //get the cylindrical face(s) from knob(s)
+                var vBodies = swComp.GetBodies3((int)swBodyType_e.swSolidBody, out _);
+                Body2 swBody = (Body2)vBodies[0];
+                var vFaces = swBody.GetFaces();
+                Entity swCompFace = default(Entity);
+                for (int i = 0; i < vFaces.Length; i++)
+                {
+                    swFace = (Face2)vFaces[i];
+                    Surface swSurf = swFace.GetSurface();
+                    if (swSurf.IsCylinder())
+                    {
+                        swCompFace = (Entity)swFace;
+                        collCompFace.Add(swCompFace);
+                        break;
                     }
                 }
             }
-            if (swDrawerEdge == null) return;
 
-
-
-            //add the component
-            
-            string strCompPath = @"E:\Videos\SolidWorks Secondary Development\SWModel\CADSharp2P20.SLDPRT";
-            swApp.DocumentVisible(false, (int)swDocumentTypes_e.swDocPART);
-            swApp.OpenDoc6(strCompPath, (int)swDocumentTypes_e.swDocPART, 0, "", 0, 0);
-            Component2 swComp = swAssy.AddComponent4(strCompPath, "", 0, 0, 0);//XYZ边界区域的中心bounding box centre  
-            swApp.DocumentVisible(true, (int)swDocumentTypes_e.swDocPART);
-
-            //get the cylindrical face(s) from knob(s)
-            var vBodies = swComp.GetBodies3((int)swBodyType_e.swSolidBody, out _);
-            Body2 swBody = (Body2)vBodies[0];
-            var vFaces = swBody.GetFaces();
-            Entity swCompFace = default(Entity);
-            for (int i = 0; i < vFaces.Length; i++)
+            //局部方法4  添加配合
+            void AddMates(Component2 swComp,Entity swCompFace,Entity swDrawerEdge)
             {
-                swFace = (Face2)vFaces[i];
-                Surface swSurf = swFace.GetSurface();
-                if (swSurf.IsCylinder())
-                {
-                    swCompFace = (Entity)swFace;
-                    break;
-                }
+                //add mates
+                //1.add coincident mate
+                swDrawerFace.Select4(false, null);
+                Debug.Print(swComp.Name2);
+                //注意对"Front Plane@" + swComp.Name2 + "@Assem1"做修改，Front Plane是swComp中的面，Assem1是swAssy的名称
+                swModel.Extension.SelectByID2("Front Plane@" + swComp.Name2 + "@Assem1", "PLANE", 0, 0, 0, true, 0, null, 0);
+                swAssy.AddMate3((int)swMateType_e.swMateCOINCIDENT, (int)swMateAlign_e.swMateAlignALIGNED, false, 0, 0, 0, 0, 0, 0, 0, 0, false, out _);
+
+                //2.add concentric mate
+                swCompFace.Select4(false, null);
+                swDrawerEdge.Select4(true, null);
+                swAssy.AddMate3((int)swMateType_e.swMateCONCENTRIC, (int)swMateAlign_e.swMateAlignANTI_ALIGNED, false, 0, 0, 0, 0, 0, 0, 0, 0, false, out _);
             }
-
-            //add mates
-            //1.add coincident mate
-            swDrawerFace.Select4(false, null);
-            Debug.Print(swComp.Name2);
-            //注意对"Front Plane@" + swComp.Name2 + "@Assem1"做修改，Front Plane是swComp中的面，Assem1是swAssy的名称
-            swModel.Extension.SelectByID2("Front Plane@" + swComp.Name2 + "@Assem1", "PLANE", 0, 0, 0, true, 0, null, 0);
-            swAssy.AddMate3((int)swMateType_e.swMateCOINCIDENT, (int)swMateAlign_e.swMateAlignALIGNED, false, 0, 0, 0, 0, 0, 0, 0, 0, false, out _);
-
-            //2.add concentric mate
-            swCompFace.Select4(false, null);
-            swDrawerEdge.Select4(true, null);
-            swAssy.AddMate3((int)swMateType_e.swMateCONCENTRIC, (int)swMateAlign_e.swMateAlignALIGNED, false, 0, 0, 0, 0, 0, 0, 0, 0, false, out _);
 
         }
 
+        /// <summary>
+        /// https://www.bilibili.com/video/BV1Mp4y1Y7Bd?p=24
+        /// Creating A New Assembly
+        /// </summary>
+        /// <param name="swApp"></param>
+        public void CADSharp2P24_2(SldWorks swApp)
+        {
+            ModelDoc2 swModel = swApp.ActiveDoc;
+            AssemblyDoc swAssy = (AssemblyDoc) swModel;
+            
+            //get the arm face by searching components for face called "ArmFace"
+            Entity swArmFace=GetArmFace();
+            swArmFace = swArmFace.GetSafeEntity();
+            //Get the full circular edge on the arm
+            GetArmEdge();
+            //Insety the handle
+            Component2 swComp =AddComp();
+            //Get a cylindrical face on the handle
+            Entity swHandleCylFace = default(Entity);
+            swHandleCylFace = GetHandleCylFace(swComp);
+            //Get the required planar face on the handle
+            GetHandlePlanarFace();
+            //Add the Mate
+            AddMate();
 
+            swModel.ClearSelection2(true);
+            swModel.ForceRebuild3(false);
+
+            //----------局部方法-------------
+            Entity GetArmFace()
+            {
+                return default(Entity);
+            }
+
+            Entity GetArmEdge()
+            {
+                return default(Entity);
+            }
+
+            Component2 AddComp()
+            {
+                return default(Component2);
+            }
+
+            Entity GetHandleCylFace(Component2 swHandleComp)
+            {
+                var vComps = swAssy.GetComponents(false);
+                for (int i = 0; i < vComps.Length; i++)
+                {
+                    var vBodies = swHandleComp.GetBodies3((int) swBodyType_e.swSolidBody, out _);
+                    Body2 swBody = (Body2) vBodies[0];
+                    var vFace = swBody.GetFaces();
+                    for (int j = 0; j < vFace.Length; j++)
+                    {
+                        Face2 swFace = vFace[i];
+                        Entity swHandleCyl = (Entity) swFace;
+                        if (swModel.GetEntityName(swHandleCylFace) == "HandleCylFace") return swHandleCyl;
+                    }
+                }
+                return default(Entity);
+            }
+
+            void GetHandlePlanarFace()
+            {
+            }
+
+            void AddMate()
+            {
+                
+            }
+
+        }
 
         /// <summary>
         /// https://www.bilibili.com/video/BV1Mp4y1Y7Bd?p=25
